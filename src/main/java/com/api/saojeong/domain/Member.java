@@ -33,6 +33,9 @@ public class Member extends BaseEntity {
     @Column(name="password", nullable=false)
     private String password;
 
+    @Column(name="carnum",nullable = false, unique = true)
+    private String carnum;
+
     @Column(name = "refresh_token")
     private String refreshToken;
 
@@ -49,6 +52,7 @@ public class Member extends BaseEntity {
         return Member.builder()
                 .memberId(request.getMemberId())
                 .password(encodedPassword)
+                .carnum(request.getCarnumber())
                 .refreshToken(refreshToken)
                 .nickname(request.getName())
                 .memberRoleList(new ArrayList<>())

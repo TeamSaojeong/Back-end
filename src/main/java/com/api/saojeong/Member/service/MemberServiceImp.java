@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static com.api.saojeong.Member.enums.Authority.ROLE_USER;
@@ -46,13 +47,13 @@ public class MemberServiceImp implements MemberService {
         String encodedPassword = passwordEncoder.encode(dto.getPassword());
         Member member = Member.toMember(dto, encodedPassword, jwtService.createRefreshToken());
         // 역할 확인
-        Optional<Role> optionalRole = roleRepository.findById(ROLE_USER.getId());
-        if (!optionalRole.isPresent()) {
-            // 역할이 존재하지 않는 경우 처리
-            CustomApiResponse<?> response = CustomApiResponse.createFailWithout(HttpStatus.BAD_REQUEST.value(), "존재하지 않는 역할입니다");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-        }
-        Role role = optionalRole.get();
+        Role role = roleRepository.findByAuthority(ROLE_USER)
+                .orElseGet(() -> roleRepository.save(
+                        Role.builder()
+                                .authority(ROLE_USER)   // id 직접 세팅하지 마세요 (IDENTITY)
+                                .build()
+                ));
+
 
         MemberRole memberRole = MemberRole.builder()
                 .role(role) // 역할을 설정

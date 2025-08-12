@@ -18,7 +18,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Builder
@@ -35,7 +37,7 @@ public class Role {
     private Authority authority;
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MemberRole> memberRoleList;
+    private List<MemberRole> memberRoleList = new ArrayList<>();
 
     // 연관 관계 편의 메서드
     public void addMemberRole(MemberRole memberRole){
