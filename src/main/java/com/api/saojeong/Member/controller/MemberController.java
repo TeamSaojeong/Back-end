@@ -1,7 +1,7 @@
 package com.api.saojeong.Member.controller;
 
 
-
+import jakarta.validation.*;
 import com.api.saojeong.Member.dto.SignupRequestDto;
 import com.api.saojeong.Member.service.MemberService;
 import com.api.saojeong.domain.Member;
@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -21,7 +22,7 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/signup")
-    public ResponseEntity<CustomApiResponse<?>> signUp(@RequestBody SignupRequestDto dto) {
+    public ResponseEntity<CustomApiResponse<?>> signUp(@RequestBody @Valid  SignupRequestDto dto) {
         ResponseEntity<CustomApiResponse<?>> response = memberService.signUp(dto);
         return response;
     }
