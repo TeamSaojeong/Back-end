@@ -3,13 +3,16 @@ package com.api.saojeong.Parking.service;
 import com.api.saojeong.Member.repository.MemberRepository;
 import com.api.saojeong.Parking.dto.CreateParkingRequestDto;
 import com.api.saojeong.Parking.dto.CreateParkingResponseDto;
+import com.api.saojeong.Parking.dto.GetMemberParkingResponseDto;
 import com.api.saojeong.Parking.dto.ParkingTimeDto;
 import com.api.saojeong.Parking.enums.ParkingKind;
+import com.api.saojeong.Parking.exception.S3UploadFailedException;
 import com.api.saojeong.Parking.repository.ParkingRepository;
 import com.api.saojeong.domain.Member;
 import com.api.saojeong.domain.Parking;
 import com.api.saojeong.domain.ParkingTime;
 import com.api.saojeong.global.s3.S3Service;
+import com.api.saojeong.global.security.LoginMember;
 import com.api.saojeong.kakao.dto.GeoResponse;
 import com.api.saojeong.kakao.service.ParkingGeocodingService;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -47,7 +51,7 @@ public class memberParkingServiceImple implements memberParkingService {
             url = s3Service.uploadFile(image);
         } catch (IOException e) {
             //에러수정하기
-            throw new IllegalStateException("S3 업로드 중 오류가 발생했습니다.", e);
+            throw new S3UploadFailedException();
         }
 
         Parking parking = Parking.builder()
@@ -84,5 +88,23 @@ public class memberParkingServiceImple implements memberParkingService {
 
 
         return new CreateParkingResponseDto(res.getId(), res.getName(), timeDtos, res.getCharge());
+    }
+
+    //개인 주차장 관리 화면 조회
+    @Override
+    public List<GetMemberParkingResponseDto> getMemberParking(Member member) {
+        List<Parking> memberParkings = parkingRepository.findByMemberIdAndKind(member.getId(), ParkingKind.PERSONAL);
+
+        List<GetMemberParkingResponseDto> res = new ArrayList<>();
+
+        for(Parking p : memberParkings){
+            res.add(new  GetMemberParkingResponseDto(
+                    p.getId(),
+                    p.getName(),
+                    p.isOperate()
+            ));
+        }
+
+        return res;
     }
 }
