@@ -2,6 +2,7 @@ package com.api.saojeong.Parking.controller;
 
 import com.api.saojeong.Parking.dto.CreateParkingResponseDto;
 import com.api.saojeong.Parking.dto.CreateParkingRequestDto;
+import com.api.saojeong.Parking.dto.GetMemberParkingResponseDto;
 import com.api.saojeong.Parking.service.memberParkingService;
 import com.api.saojeong.domain.Member;
 import com.api.saojeong.global.security.LoginMember;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RequestMapping("/api")
 @RestController
@@ -36,5 +39,19 @@ public class ParkingController {
                         "주차장 등록 완료"
                 ));
     }
+
+    @GetMapping("/parking")
+    public ResponseEntity<CustomApiResponse<?>> getMemberParking(@LoginMember Member loginMember){
+        List<GetMemberParkingResponseDto> res = memberParkingService.getMemberParking(loginMember);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CustomApiResponse.createSuccess(
+                        HttpStatus.OK.value(),
+                        res,
+                        "개인 주차장 조회 완료"
+                ));
+    }
+
 
 }
