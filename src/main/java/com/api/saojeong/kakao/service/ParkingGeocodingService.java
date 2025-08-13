@@ -32,6 +32,7 @@ public class ParkingGeocodingService {
         String url = UriComponentsBuilder
                 .fromHttpUrl("https://dapi.kakao.com/v2/local/search/address.json")
                 .queryParam("query",address)
+                .build()
                 .toUriString();
 
         //헤더값
@@ -41,6 +42,8 @@ public class ParkingGeocodingService {
         //헤더만 포함된 HTTP요청 객체
         HttpEntity<?> entity = new HttpEntity<>(headers);
 
+        System.out.println("Kakao API Request URL: " + url);
+
         //(exchange메서드)요청을 보내고 응답받기
         ResponseEntity<KakaoGeoAPIResponse> response = restTemplate.exchange(
                 url,  //api주소
@@ -49,6 +52,8 @@ public class ParkingGeocodingService {
                 KakaoGeoAPIResponse.class //응답 형태
         );
 
+        String rawResponse = restTemplate.exchange(url, HttpMethod.GET, entity, String.class).getBody();
+        System.out.println("Kakao API Raw JSON: " + rawResponse);
 
         //리스트에서 주소가 있는 documents 꺼냄
         List<KakaoGeoAPIResponse.Document> documents = response.getBody().getDocuments();
