@@ -119,4 +119,29 @@ public class memberParkingServiceImple implements memberParkingService {
 
         return new ModifyMemberParkingOperResponseDto(parking.getId(), parking.isOperate());
     }
+
+    @Override
+    public GetDetailMemberParkingResponseDto getDetailMemberParking(Member member, Long parkingId) {
+        //주차장이 없을 경우
+        Parking parking = parkingRepository.findById(parkingId)
+                .orElseThrow(ParkingNotFoundException::new);
+
+        List<ParkingTimeDto> timeDtos = parking.getParkingTimes().stream()
+                .map(t -> new ParkingTimeDto(
+                        t.getStart().toString(),
+                        t.getEnd().toString()
+                ))
+                .toList();
+
+        GetDetailMemberParkingResponseDto ResDto = GetDetailMemberParkingResponseDto.builder()
+                .parkingName(parking.getName())
+                .address(parking.getAddress())
+                .photo(parking.getPhoto())
+                .content(parking.getContent())
+                .availableTimes(timeDtos)
+                .charge(parking.getCharge())
+                .build();
+
+        return ResDto;
+    }
 }
