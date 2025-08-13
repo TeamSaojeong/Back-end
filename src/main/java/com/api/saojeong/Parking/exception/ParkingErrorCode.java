@@ -13,7 +13,7 @@ public enum ParkingErrorCode implements BaseResponseCode {
 
 
     private final String code;
-    private final int httpStatus;
+    private final int status;
     private final String message;
 
 }
