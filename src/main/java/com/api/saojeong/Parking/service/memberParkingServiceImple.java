@@ -1,11 +1,9 @@
 package com.api.saojeong.Parking.service;
 
 import com.api.saojeong.Member.repository.MemberRepository;
-import com.api.saojeong.Parking.dto.CreateParkingRequestDto;
-import com.api.saojeong.Parking.dto.CreateParkingResponseDto;
-import com.api.saojeong.Parking.dto.GetMemberParkingResponseDto;
-import com.api.saojeong.Parking.dto.ParkingTimeDto;
+import com.api.saojeong.Parking.dto.*;
 import com.api.saojeong.Parking.enums.ParkingKind;
+import com.api.saojeong.Parking.exception.ParkingNotFoundException;
 import com.api.saojeong.Parking.exception.S3UploadFailedException;
 import com.api.saojeong.Parking.repository.ParkingRepository;
 import com.api.saojeong.domain.Member;
@@ -17,6 +15,7 @@ import com.api.saojeong.kakao.dto.GeoResponse;
 import com.api.saojeong.kakao.service.ParkingGeocodingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -78,7 +77,6 @@ public class memberParkingServiceImple implements memberParkingService {
 
         Parking res = parkingRepository.save(parking);
 
-        // 엔티티 → DTO 변환
         List<ParkingTimeDto> timeDtos = res.getParkingTimes().stream()
                 .map(t -> new ParkingTimeDto(
                         t.getStart().toString(),
@@ -106,5 +104,19 @@ public class memberParkingServiceImple implements memberParkingService {
         }
 
         return res;
+    }
+
+    //토글로 주차장 활성화 수정
+    @Transactional
+    @Override
+    public ModifyMemberParkingOperResponseDto modifyMemberParkingOper(Member member, Long parkingId) {
+        //주차장이 없을 경우
+        Parking parking = parkingRepository.findById(parkingId)
+                .orElseThrow(ParkingNotFoundException::new);
+
+        //전환
+        parking.setOperate(!parking.isOperate());
+
+        return new ModifyMemberParkingOperResponseDto(parking.getId(), parking.isOperate());
     }
 }
