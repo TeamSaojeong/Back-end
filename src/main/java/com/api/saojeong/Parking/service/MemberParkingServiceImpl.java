@@ -24,7 +24,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class memberParkingServiceImple implements memberParkingService {
+public class MemberParkingServiceImpl implements MemberParkingService {
 
     private final MemberRepository memberRepository;
     private final ParkingRepository parkingRepository;

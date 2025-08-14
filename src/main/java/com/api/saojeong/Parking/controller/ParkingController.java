@@ -1,7 +1,7 @@
 package com.api.saojeong.Parking.controller;
 
 import com.api.saojeong.Parking.dto.*;
-import com.api.saojeong.Parking.service.memberParkingService;
+import com.api.saojeong.Parking.service.MemberParkingService;
 import com.api.saojeong.domain.Member;
 import com.api.saojeong.global.security.LoginMember;
 import com.api.saojeong.global.utill.response.CustomApiResponse;
@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ParkingController {
 
-    private final memberParkingService memberParkingService;
+    private final MemberParkingService memberParkingService;
 
     //개인 주차장 추가
     @PostMapping("/parking")
