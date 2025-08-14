@@ -66,8 +66,8 @@ public class MemberParkingServiceImpl implements MemberParkingService {
 
         for (ParkingTimeDto t : req.getOperateTimes()) {
             ParkingTime time = ParkingTime.builder()
-                    .start(LocalTime.parse(t.getStart())) // "HH:mm"
-                    .end(LocalTime.parse(t.getEnd()))
+                    .start(t.getStart())
+                    .end(t.getEnd())
                     .build();
 
             parking.addParkingTime(time);
@@ -77,8 +77,8 @@ public class MemberParkingServiceImpl implements MemberParkingService {
 
         List<ParkingTimeDto> timeDtos = res.getParkingTimes().stream()
                 .map(t -> new ParkingTimeDto(
-                        t.getStart().toString(),
-                        t.getEnd().toString()
+                        t.getStart(),
+                        t.getEnd()
                 ))
                 .toList();
 
@@ -127,8 +127,8 @@ public class MemberParkingServiceImpl implements MemberParkingService {
 
         List<ParkingTimeDto> timeDtos = parking.getParkingTimes().stream()
                 .map(t -> new ParkingTimeDto(
-                        t.getStart().toString(),
-                        t.getEnd().toString()
+                        t.getStart(),
+                        t.getEnd()
                 ))
                 .toList();
 
@@ -177,8 +177,8 @@ public class MemberParkingServiceImpl implements MemberParkingService {
 
             for (ParkingTimeDto t : request.getOperateTimes()) {
                 ParkingTime time = ParkingTime.builder()
-                        .start(LocalTime.parse(t.getStart())) // "HH:mm"
-                        .end(LocalTime.parse(t.getEnd()))
+                        .start(t.getStart()) // "HH:mm"
+                        .end(t.getEnd())
                         .build();
 
                 parking.addParkingTime(time);
@@ -204,8 +204,8 @@ public class MemberParkingServiceImpl implements MemberParkingService {
 
         List<ParkingTimeDto> timeDtos = parking.getParkingTimes().stream()
                 .map(t -> new ParkingTimeDto(
-                        t.getStart().toString(),
-                        t.getEnd().toString()
+                        t.getStart(),
+                        t.getEnd()
                 ))
                 .toList();
 
