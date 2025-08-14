@@ -10,7 +10,6 @@ import com.api.saojeong.domain.Member;
 import com.api.saojeong.domain.Parking;
 import com.api.saojeong.domain.ParkingTime;
 import com.api.saojeong.global.s3.S3Service;
-import com.api.saojeong.global.security.LoginMember;
 import com.api.saojeong.kakao.dto.GeoResponse;
 import com.api.saojeong.kakao.service.ParkingGeocodingService;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +48,6 @@ public class memberParkingServiceImple implements memberParkingService {
         try {
             url = s3Service.uploadFile(image);
         } catch (IOException e) {
-            //에러수정하기
             throw new S3UploadFailedException();
         }
 
@@ -120,6 +118,7 @@ public class memberParkingServiceImple implements memberParkingService {
         return new ModifyMemberParkingOperResponseDto(parking.getId(), parking.isOperate());
     }
 
+    //개인 주차장 상세 조회
     @Override
     public GetDetailMemberParkingResponseDto getDetailMemberParking(Member member, Long parkingId) {
         //주차장이 없을 경우
@@ -143,5 +142,73 @@ public class memberParkingServiceImple implements memberParkingService {
                 .build();
 
         return ResDto;
+    }
+
+    //개인 주차장 수정
+    @Override
+    public CreateParkingResponseDto updateMemberParking(Member member, Long parkingId, UpdateMemberParkingRequestDto request, MultipartFile image) {
+
+        //주차장이 없을 경우
+        Parking parking = parkingRepository.findById(parkingId)
+                .orElseThrow(ParkingNotFoundException::new);
+
+        // 텍스트 수정 (null 체크로 기존 값 유지)
+        if (request.getName() != null)
+            parking.setName(request.getName() );
+
+        if (request.getAddress() != null) {
+            parking.setAddress(request.getAddress());
+
+            //좌표 변환
+            GeoResponse geo = parkingGeocodingService.getGeodoing(request.getAddress());
+            parking.setPLat(geo.getLat());
+            parking.setPLng(geo.getLng());
+        }
+
+        if (request.getContent() != null)
+            parking.setContent(request.getContent());
+
+        if (request.getCharge() != null)
+            parking.setCharge(request.getCharge());
+
+        //사용 가능 시간이 수정 된다면
+        if(request.getAvailableTimes() != null){
+            parking.getParkingTimes().clear();
+
+            for (ParkingTimeDto t : request.getAvailableTimes()) {
+                ParkingTime time = ParkingTime.builder()
+                        .start(LocalTime.parse(t.getStart())) // "HH:mm"
+                        .end(LocalTime.parse(t.getEnd()))
+                        .build();
+
+                parking.addParkingTime(time);
+            }
+        }
+
+        //사진이 수정된다면
+        if(image != null){
+
+            String key = parking.getPhoto().replace("https://parkherebucket.s3.ap-northeast-2.amazonaws.com/", "");
+            System.out.println(key);
+            s3Service.deleteFile(key);
+
+            //사진 s3저장
+            try {
+                String url = s3Service.uploadFile(image);
+                parking.setPhoto(url);
+            } catch (IOException e) {
+                throw new S3UploadFailedException();
+            }
+
+        }
+
+        List<ParkingTimeDto> timeDtos = parking.getParkingTimes().stream()
+                .map(t -> new ParkingTimeDto(
+                        t.getStart().toString(),
+                        t.getEnd().toString()
+                ))
+                .toList();
+
+        return new CreateParkingResponseDto(parking.getId(), parking.getName(), timeDtos, parking.getCharge());
     }
 }

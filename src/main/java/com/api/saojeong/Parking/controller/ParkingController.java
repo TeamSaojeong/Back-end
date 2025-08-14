@@ -6,10 +6,10 @@ import com.api.saojeong.domain.Member;
 import com.api.saojeong.global.security.LoginMember;
 import com.api.saojeong.global.utill.response.CustomApiResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +26,7 @@ public class ParkingController {
     @PostMapping("/parking")
     public ResponseEntity<CustomApiResponse<?>> createMemberParking(@LoginMember Member loginMember,
                                                                     @Valid @RequestPart("request") CreateParkingRequestDto createParkingRequestDto,
-                                                                    @RequestPart("image") MultipartFile image){
+                                                                    @RequestPart(value = "image", required = true) MultipartFile image){
 
         CreateParkingResponseDto creatParkingRes = memberParkingService.save(loginMember,image, createParkingRequestDto);
 
@@ -82,6 +82,23 @@ public class ParkingController {
                         HttpStatus.OK.value(),
                         res,
                         "주차장 활성화 전환 성공"
+                ));
+    }
+
+    @Transactional
+    @PatchMapping("/parking/{parking_id}/modify")
+    public ResponseEntity<CustomApiResponse<?>> modifyMemberParking(@LoginMember Member member,
+                                                                    @PathVariable Long parking_id,
+                                                                    @Valid @RequestPart("request") UpdateMemberParkingRequestDto request,
+                                                                    @RequestPart(value = "image", required = false) MultipartFile photo){
+        CreateParkingResponseDto res = memberParkingService.updateMemberParking(member, parking_id, request, photo);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CustomApiResponse.createSuccess(
+                        HttpStatus.OK.value(),
+                        res,
+                        "주차장 수정 성공"
                 ));
     }
 
