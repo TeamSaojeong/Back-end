@@ -22,7 +22,7 @@ public class CreateParkingRequestDto {
     private String content;
 
     @NotEmpty(message = "주차 가능 시간을 1개 이상 입력해주세요.")
-    private List<ParkingTimeDto> availableTimes;
+    private List<ParkingTimeDto> operateTimes;
 
     @Min(value = 0, message = "주차 요금은 0 이상이어야 합니다.")
     private int charge;

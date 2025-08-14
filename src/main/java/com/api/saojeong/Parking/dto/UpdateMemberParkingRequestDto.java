@@ -17,7 +17,7 @@ public class UpdateMemberParkingRequestDto {
 
     private String content;
 
-    private List<ParkingTimeDto> availableTimes;
+    private List<ParkingTimeDto> operateTimes;
 
     private Integer charge;
 }

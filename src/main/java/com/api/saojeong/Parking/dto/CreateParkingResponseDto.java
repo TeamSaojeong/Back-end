@@ -14,7 +14,7 @@ public class CreateParkingResponseDto {
     //Long member_id;
     private Long parking_id;
     private String name;
-    private List<ParkingTimeDto> availableTimes;
+    private List<ParkingTimeDto> operateTimes;
     private int charge;
 
 }

@@ -64,7 +64,7 @@ public class memberParkingServiceImple implements memberParkingService {
                 .content(req.getContent())
                 .build();
 
-        for (ParkingTimeDto t : req.getAvailableTimes()) {
+        for (ParkingTimeDto t : req.getOperateTimes()) {
             ParkingTime time = ParkingTime.builder()
                     .start(LocalTime.parse(t.getStart())) // "HH:mm"
                     .end(LocalTime.parse(t.getEnd()))
@@ -137,7 +137,7 @@ public class memberParkingServiceImple implements memberParkingService {
                 .address(parking.getAddress())
                 .photo(parking.getPhoto())
                 .content(parking.getContent())
-                .availableTimes(timeDtos)
+                .operateTimes(timeDtos)
                 .charge(parking.getCharge())
                 .build();
 
@@ -172,10 +172,10 @@ public class memberParkingServiceImple implements memberParkingService {
             parking.setCharge(request.getCharge());
 
         //사용 가능 시간이 수정 된다면
-        if(request.getAvailableTimes() != null){
+        if(request.getOperateTimes() != null){
             parking.getParkingTimes().clear();
 
-            for (ParkingTimeDto t : request.getAvailableTimes()) {
+            for (ParkingTimeDto t : request.getOperateTimes()) {
                 ParkingTime time = ParkingTime.builder()
                         .start(LocalTime.parse(t.getStart())) // "HH:mm"
                         .end(LocalTime.parse(t.getEnd()))

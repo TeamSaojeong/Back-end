@@ -9,7 +9,7 @@ public record GetDetailMemberParkingResponseDto(
         String address,
         String photo,
         String content,
-        List<ParkingTimeDto> availableTimes,
+        List<ParkingTimeDto> operateTimes,
         int charge
 
 ) {
