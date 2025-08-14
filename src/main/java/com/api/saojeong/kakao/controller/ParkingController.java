@@ -21,7 +21,7 @@ public class ParkingController {
     public Mono<List<ParkingWithRate>> nearby(
             @RequestParam double lat,
             @RequestParam double lon,
-            @RequestParam(defaultValue = "300") int radius,
+            @RequestParam(defaultValue = "500") int radius,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "15") int size,
             @RequestParam(defaultValue = "distance") String sort
