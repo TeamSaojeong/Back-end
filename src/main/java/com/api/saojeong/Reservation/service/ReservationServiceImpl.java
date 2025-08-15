@@ -61,7 +61,7 @@ public class ReservationServiceImpl implements ReservationService {
                 if(soonOutOpt.isPresent()){
                     SoonOut soonOut = soonOutOpt.get();
                     buttonStatus = ButtonStatus.RESERVABLE;
-                    soonOutTime = soonOut.getTime();
+                    soonOutTime = soonOut.getMinute();
                 }
                 else
                     buttonStatus = ButtonStatus.USING;
@@ -118,11 +118,11 @@ public class ReservationServiceImpl implements ReservationService {
                         .orElseThrow(SoonOutNotFound::new);
 
                 //10~6분 남았을때 : 예약하는 시간 +10분 뒤부터 시작
-                if(soonOut.getTime() == 10){
+                if(soonOut.getMinute() == 10){
                     startTime = now.plusMinutes(10);
                 }
                 //5~1분 남았을때 : 예약하는 시간 +5분 뒤부터 시작
-                else if(soonOut.getTime() == 5){
+                else if(soonOut.getMinute() == 5){
                     startTime = now.plusMinutes(5);
                 }
 
