@@ -4,6 +4,8 @@ import com.api.saojeong.Reservation.exception.ReservationNotFound;
 import com.api.saojeong.Reservation.repository.ReservationRepository;
 import com.api.saojeong.SoonOut.dto.CreateSoonOutRequestDto;
 import com.api.saojeong.SoonOut.dto.CreateSoonOutResponseDto;
+import com.api.saojeong.SoonOut.dto.CancelSoonOutResponseDto;
+import com.api.saojeong.SoonOut.exception.SoonOutNotFound;
 import com.api.saojeong.SoonOut.respotiory.SoonOutRepository;
 import com.api.saojeong.domain.Member;
 import com.api.saojeong.domain.Parking;
@@ -11,6 +13,7 @@ import com.api.saojeong.domain.Reservation;
 import com.api.saojeong.domain.SoonOut;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -29,11 +32,12 @@ public class SoonOutServiceImpl implements SoonOutService {
 
         Parking parking = reservation.getParking();
 
-        //기존 알람이 있는지 확인
-        SoonOut soonOut = soonOutRepository.findByReservationIdAndStatus(reservationId, true);
+        //기존 알람이 있는지 확인(활성화, 비활성화 모두)
+        SoonOut soonOut = soonOutRepository.findByReservationIdAndParkingId(reservationId,parking.getId());
 
         if(soonOut != null) {
             soonOut.setMinute(req.getSoonMinute());
+            soonOut.setStatus(true);
         }
         else{
             soonOut = SoonOut.builder()
@@ -50,5 +54,17 @@ public class SoonOutServiceImpl implements SoonOutService {
 
         return new CreateSoonOutResponseDto(res.getId(), res.getParking().getId(),
                 res.getReservation().getId(), res.getLat(), res.getLng(), res.getStatus());
+    }
+
+    //곧 나감 취소
+    @Transactional
+    @Override
+    public CancelSoonOutResponseDto cancelSoonOut(Member member, Long soonOutId) {
+        //곧 나감 존재 확인
+        SoonOut soonOut = soonOutRepository.findByIdAndStatus(soonOutId, true)
+                .orElseThrow(SoonOutNotFound::new);
+
+        soonOut.setStatus(false);
+        return new CancelSoonOutResponseDto(soonOut.getId(), soonOut.getStatus());
     }
 }
