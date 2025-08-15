@@ -175,7 +175,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .orElseThrow(ReservationNotFound::new);
 
         //예약된 예약자 확인
-        if (!res.getMember().getId().equals(res.getId())) {
+        if (!res.getMember().getId().equals(member.getId())) {
             throw new IllegalArgumentException("본인의 예약만 연장할 수 있습니다.");
         }
 
@@ -183,6 +183,12 @@ public class ReservationServiceImpl implements ReservationService {
         res.setUserEnd(
                 res.getUserEnd()
                 .plusMinutes(req.getUsingMinutes()));
+
+        //곧나감이 존재하면 비활성화
+        SoonOut soonOut = soonOutRepository.findByReservationIdAndStatus(reservationId, true);
+        if(soonOut != null){
+            soonOut.setStatus(false);
+        }
 
 
         return new CreateReservationResponseDto(
