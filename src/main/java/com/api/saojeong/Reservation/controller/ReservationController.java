@@ -55,8 +55,16 @@ public class ReservationController {
     @PatchMapping("/{parkingId}/reservations/{reservationId}/extend")
     public ResponseEntity<CustomApiResponse<?>> extendReservation(@LoginMember Member member,
                                                                   @PathVariable Long parkingId,
+                                                                  @PathVariable Long reservationId,
                                                                   @RequestBody CreateReservationRequestDto req){
-        CreateReservationResponseDto res = reservationService.extendReservation(member, parkingId, req);
+        CreateReservationResponseDto res = reservationService.extendReservation(member, parkingId, reservationId, req);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CustomApiResponse.createSuccess(
+                        HttpStatus.OK.value(),
+                        res,
+                        "예약 시간 연장"
+                ));
     }
 
 }
