@@ -85,6 +85,7 @@ public class ParkingController {
                 ));
     }
 
+    //주차장 정보 수정
     @Transactional
     @PatchMapping("/parking/{parkingId}/modify")
     public ResponseEntity<CustomApiResponse<?>> modifyMemberParking(@LoginMember Member member,
