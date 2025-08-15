@@ -1,6 +1,5 @@
 package com.api.saojeong.Parking.dto;
 
-import com.api.saojeong.domain.ParkingTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
