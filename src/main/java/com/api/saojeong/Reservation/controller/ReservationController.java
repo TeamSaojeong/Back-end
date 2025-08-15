@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api")
+@RequestMapping("/api/parking")
 @RestController
 @AllArgsConstructor
 public class ReservationController {
@@ -20,9 +20,9 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     //당일 예약 상태 간단 조회
-    @GetMapping("/parking/{parking_id}/status")
+    @GetMapping("/{parkingId}/status")
     public ResponseEntity<CustomApiResponse<?>> getReservation(@LoginMember Member member,
-                                                               @PathVariable("parking_id") Long parkingId){
+                                                               @PathVariable Long parkingId){
         GetReservationResponseDto res = reservationService.getReservation(member, parkingId);
 
         return ResponseEntity
@@ -35,9 +35,9 @@ public class ReservationController {
     }
 
     //예약 시간 추가
-    @PostMapping("/parking/{parking_id}/reservation")
+    @PostMapping("/{parkingId}/reservation")
     public ResponseEntity<CustomApiResponse<?>> createReservation(@LoginMember Member member,
-                                                                  @PathVariable("parking_id") Long parkingId,
+                                                                  @PathVariable Long parkingId,
                                                                   @RequestBody CreateReservationRequestDto req){
 
         CreateReservationResponseDto res = reservationService.createReservation(member, parkingId, req);
@@ -51,5 +51,12 @@ public class ReservationController {
                 ));
     }
 
+    //연장하기
+    @PatchMapping("/{parkingId}/reservations/{reservationId}/extend")
+    public ResponseEntity<CustomApiResponse<?>> extendReservation(@LoginMember Member member,
+                                                                  @PathVariable Long parkingId,
+                                                                  @RequestBody CreateReservationRequestDto req){
+        CreateReservationResponseDto res = reservationService.extendReservation(member, parkingId, req);
+    }
 
 }

@@ -54,11 +54,11 @@ public class ParkingController {
     }
 
     //개인 주차장 상세 조회
-    @GetMapping("/parking/{parking_id}")
+    @GetMapping("/parking/{parkingId}")
     public ResponseEntity<CustomApiResponse<?>> getMemberParking(@LoginMember Member member,
-                                                                 @PathVariable Long parking_id){
+                                                                 @PathVariable Long parkingId){
 
-        GetDetailMemberParkingResponseDto res = memberParkingService.getDetailMemberParking(member, parking_id);
+        GetDetailMemberParkingResponseDto res = memberParkingService.getDetailMemberParking(member, parkingId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -70,11 +70,11 @@ public class ParkingController {
     }
 
     //개인 주차장 활성화
-    @PatchMapping("/parking/{parking_id}/operate")
+    @PatchMapping("/parking/{parkingId}/operate")
     public ResponseEntity<CustomApiResponse<?>> changeOperate(@LoginMember Member member,
-                                                              @PathVariable Long parking_id
+                                                              @PathVariable Long parkingId
                                                               ){
-        ModifyMemberParkingOperResponseDto res = memberParkingService.modifyMemberParkingOper(member, parking_id);
+        ModifyMemberParkingOperResponseDto res = memberParkingService.modifyMemberParkingOper(member, parkingId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -86,12 +86,12 @@ public class ParkingController {
     }
 
     @Transactional
-    @PatchMapping("/parking/{parking_id}/modify")
+    @PatchMapping("/parking/{parkingId}/modify")
     public ResponseEntity<CustomApiResponse<?>> modifyMemberParking(@LoginMember Member member,
-                                                                    @PathVariable Long parking_id,
-                                                                    @Valid @RequestPart("request") UpdateMemberParkingRequestDto request,
+                                                                    @PathVariable Long parkingId,
+                                                                    @Valid @RequestPart UpdateMemberParkingRequestDto request,
                                                                     @RequestPart(value = "image", required = false) MultipartFile photo){
-        CreateParkingResponseDto res = memberParkingService.updateMemberParking(member, parking_id, request, photo);
+        CreateParkingResponseDto res = memberParkingService.updateMemberParking(member, parkingId, request, photo);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
