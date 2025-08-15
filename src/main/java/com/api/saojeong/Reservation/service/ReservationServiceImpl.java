@@ -37,8 +37,6 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public GetReservationResponseDto getReservation(Member member, Long parkingId) {
 
-
-
         //운영시간 체크
         OperateTimeCheck check = checkOperateTime(parkingId);
         //운영시간이 아니거나 마지막 예약 가능 시간을 지나면
@@ -164,18 +162,15 @@ public class ReservationServiceImpl implements ReservationService {
     //예약 연장
     @Transactional
     @Override
-    public CreateReservationResponseDto extendReservation(Member member, Long parkingId, Long reservationId, CreateReservationRequestDto req) {
-        //활성화된 주차장 체크
-        Parking parking = parkingRepository.findByIdAndOperate(parkingId, true)
-                .orElseThrow(ParkingNotFoundException::new);
+    public CreateReservationResponseDto extendReservation(Member member, Long reservationId, CreateReservationRequestDto req) {
 
         //활성화된 예약 체크
         Reservation res = reservationRepository.findByIdAndStatus(reservationId, true)
                 .orElseThrow(ReservationNotFound::new);
 
-        //예약된 주차장 확인
-        if (!res.getParking().getId().equals(parking.getId())) {
-            throw new IllegalArgumentException("해당 예약은 이 주차장에 속하지 않습니다.");
+        //예약된 예약자 확인
+        if (!res.getMember().getId().equals(res.getId())) {
+            throw new IllegalArgumentException("본인의 예약만 연장할 수 있습니다.");
         }
 
         //예약 시간 추가
