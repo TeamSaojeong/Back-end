@@ -4,5 +4,5 @@ import lombok.Getter;
 
 @Getter
 public class CreateReservationRequestDto {
-    private int useMinutes;
+    private int usingMinutes;
 }
