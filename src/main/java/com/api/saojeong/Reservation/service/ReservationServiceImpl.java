@@ -33,7 +33,6 @@ public class ReservationServiceImpl implements ReservationService {
     private final SoonOutRepository soonOutRepository;
 
     //당일 예약 상태 간단 조회
-    //예외처리하기
     @Override
     public GetReservationResponseDto getReservation(Member member, Long parkingId) {
 
