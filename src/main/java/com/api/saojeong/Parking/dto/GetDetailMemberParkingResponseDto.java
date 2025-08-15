@@ -6,6 +6,7 @@ import java.util.List;
 @Builder
 public record GetDetailMemberParkingResponseDto(
         String parkingName,
+        String zipcode,
         String address,
         String image,
         String content,
