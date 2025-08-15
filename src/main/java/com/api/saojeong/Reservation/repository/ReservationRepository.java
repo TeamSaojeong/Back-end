@@ -16,4 +16,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findFirstByParkingIdAndStatus(Long parkingId, boolean status);
 
     Optional<Reservation> findByIdAndStatus(Long reservationId, boolean b);
+
+    List<Reservation> findByStatusAndUserEndBefore(boolean b, LocalDateTime now);
 }
