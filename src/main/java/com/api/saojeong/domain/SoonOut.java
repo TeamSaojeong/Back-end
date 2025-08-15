@@ -1,14 +1,12 @@
 package com.api.saojeong.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Entity
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class SoonOut {
@@ -26,8 +24,8 @@ public class SoonOut {
     @Column(name = "status")
     private Boolean status;
 
-    @Column(name = "time")
-    private int time;
+    @Column(name = "minute")
+    private int minute;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parking_id")

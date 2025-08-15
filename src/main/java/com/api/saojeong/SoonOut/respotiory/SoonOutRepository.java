@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface SoonOutRepository extends JpaRepository<SoonOut,Long> {
     Optional<SoonOut> findByParkingIdAndStatus(Long parkingId, boolean b);
+
+    SoonOut findByReservationIdAndStatus(Long reservationId, boolean b);
 }
