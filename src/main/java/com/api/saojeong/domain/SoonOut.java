@@ -1,5 +1,6 @@
 package com.api.saojeong.domain;
 
+import com.api.saojeong.global.utill.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +10,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class SoonOut {
+public class SoonOut extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "soonout_id")
