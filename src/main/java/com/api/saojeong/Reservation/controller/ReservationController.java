@@ -1,5 +1,6 @@
 package com.api.saojeong.Reservation.controller;
 
+import com.api.saojeong.Reservation.dto.CheckOutReservationResponseDto;
 import com.api.saojeong.Reservation.dto.CreateReservationResponseDto;
 import com.api.saojeong.Reservation.dto.GetReservationResponseDto;
 import com.api.saojeong.Reservation.service.ReservationService;
@@ -63,6 +64,20 @@ public class ReservationController {
                         HttpStatus.OK.value(),
                         res,
                         "예약 시간 연장"
+                ));
+    }
+
+    //출차하기를 눌렀을때
+    @PatchMapping("/reservation/{reservationId}/checkout")
+    public ResponseEntity<CustomApiResponse<?>> checkoutReservation(@LoginMember Member member,
+                                                                    @PathVariable Long reservationId){
+        CheckOutReservationResponseDto res = reservationService.checkoutReservation(member, reservationId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CustomApiResponse.createSuccess(
+                        HttpStatus.OK.value(),
+                        res,
+                        "출차 성공"
                 ));
     }
 

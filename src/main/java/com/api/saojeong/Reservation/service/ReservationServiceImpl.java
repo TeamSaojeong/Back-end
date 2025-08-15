@@ -188,6 +188,27 @@ public class ReservationServiceImpl implements ReservationService {
                 req.getUsingMinutes());
     }
 
+    //출차하기
+    @Transactional
+    @Override
+    public CheckOutReservationResponseDto checkoutReservation(Member member, Long reservationId) {
+        //예약 확인
+        Reservation reservation = reservationRepository.findByIdAndStatus(reservationId, true)
+                .orElseThrow(ReservationNotFound::new);
+        //곧나감 알림 확인
+        //없으면 사용자가 곧나감을 누르지 않고 출차하는 것
+        SoonOut soonOut = soonOutRepository.findByReservationIdAndStatus(reservationId, true);
+        boolean soonStatus = false;
+
+        reservation.setStatus(false);
+        if(soonOut != null) {
+            soonOut.setStatus(false);
+            soonStatus = soonOut.getStatus();
+        }
+
+        return new CheckOutReservationResponseDto(member.getId(), reservation.getStatus(),soonStatus);
+    }
+
 
     //운영시간 체크 & 마지막 에약 시작 가능 시각을 넘겼을때 (10분단위)
     private OperateTimeCheck checkOperateTime(Long parkingId) {

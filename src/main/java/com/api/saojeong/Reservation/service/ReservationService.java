@@ -1,5 +1,6 @@
 package com.api.saojeong.Reservation.service;
 
+import com.api.saojeong.Reservation.dto.CheckOutReservationResponseDto;
 import com.api.saojeong.Reservation.dto.CreateReservationRequestDto;
 import com.api.saojeong.Reservation.dto.CreateReservationResponseDto;
 import com.api.saojeong.Reservation.dto.GetReservationResponseDto;
@@ -14,4 +15,7 @@ public interface ReservationService {
 
     //예약시간 연장
     CreateReservationResponseDto extendReservation(Member member, Long reservationId, CreateReservationRequestDto req);
+
+    //출차하기
+    CheckOutReservationResponseDto checkoutReservation(Member member, Long reservationId);
 }
