@@ -7,6 +7,7 @@ import com.api.saojeong.Parking.repository.ParkingTimeRepository;
 import com.api.saojeong.Reservation.dto.*;
 import com.api.saojeong.Reservation.enums.ButtonStatus;
 import com.api.saojeong.Reservation.exception.NoOperateTime;
+import com.api.saojeong.Reservation.exception.ReservationNotFound;
 import com.api.saojeong.Reservation.exception.TimePassLastReservationTime;
 import com.api.saojeong.Reservation.repository.ReservationRepository;
 import com.api.saojeong.SoonOut.exception.SoonOutNotFound;
@@ -14,6 +15,8 @@ import com.api.saojeong.SoonOut.respotiory.SoonOutRepository;
 import com.api.saojeong.domain.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
@@ -132,7 +135,7 @@ public class ReservationServiceImpl implements ReservationService {
                     .member(member)
                     .parking(parking)
                     .userStart(startTime)
-                    .userEnd(startTime.plusMinutes(req.getUseMinutes()))
+                    .userEnd(startTime.plusMinutes(req.getUsingMinutes()))
                     .status(true)
                     .build();
         }
@@ -142,7 +145,7 @@ public class ReservationServiceImpl implements ReservationService {
                     .member(member)
                     .parking(parking)
                     .userStart(now)
-                    .userEnd(now.plusMinutes(req.getUseMinutes()))
+                    .userEnd(now.plusMinutes(req.getUsingMinutes()))
                     .status(true)
                     .build();
         }
@@ -150,11 +153,44 @@ public class ReservationServiceImpl implements ReservationService {
         Reservation res = reservationRepository.save(rev);
 
         return new CreateReservationResponseDto(
+                res.getId(),
                 res.getMember().getId(),
                 res.getParking().getName(),
                 res.getUserStart().toLocalTime(),
                 res.getUserEnd().toLocalTime(),
-                req.getUseMinutes());
+                req.getUsingMinutes());
+    }
+
+    //예약 연장
+    @Transactional
+    @Override
+    public CreateReservationResponseDto extendReservation(Member member, Long parkingId, Long reservationId, CreateReservationRequestDto req) {
+        //활성화된 주차장 체크
+        Parking parking = parkingRepository.findByIdAndOperate(parkingId, true)
+                .orElseThrow(ParkingNotFoundException::new);
+
+        //활성화된 예약 체크
+        Reservation res = reservationRepository.findByIdAndStatus(reservationId, true)
+                .orElseThrow(ReservationNotFound::new);
+
+        //예약된 주차장 확인
+        if (!res.getParking().getId().equals(parking.getId())) {
+            throw new IllegalArgumentException("해당 예약은 이 주차장에 속하지 않습니다.");
+        }
+
+        //예약 시간 추가
+        res.setUserEnd(
+                res.getUserEnd()
+                .plusMinutes(req.getUsingMinutes()));
+
+
+        return new CreateReservationResponseDto(
+                res.getId(),
+                res.getMember().getId(),
+                res.getParking().getName(),
+                res.getUserStart().toLocalTime(),
+                res.getUserEnd().toLocalTime(),
+                req.getUsingMinutes());
     }
 
 
