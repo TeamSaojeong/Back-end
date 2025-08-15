@@ -89,6 +89,7 @@ public class MemberParkingServiceImpl implements MemberParkingService {
     }
 
     //개인 주차장 관리 화면 조회
+    //개인 주차장 리스트 조회
     @Override
     public List<GetMemberParkingResponseDto> getMemberParking(Member member) {
         List<Parking> memberParkings = parkingRepository.findByMemberIdAndKind(member.getId(), ParkingKind.PERSONAL);
@@ -136,6 +137,7 @@ public class MemberParkingServiceImpl implements MemberParkingService {
 
         GetDetailMemberParkingResponseDto ResDto = GetDetailMemberParkingResponseDto.builder()
                 .parkingName(parking.getName())
+                .zipcode(parking.getZipcode())
                 .address(parking.getAddress())
                 .image(parking.getImage())
                 .content(parking.getContent())
@@ -155,10 +157,12 @@ public class MemberParkingServiceImpl implements MemberParkingService {
                 .orElseThrow(ParkingNotFoundException::new);
 
         // 텍스트 수정 (null 체크로 기존 값 유지)
-        if (request.getName() != null)
-            parking.setName(request.getName() );
+        if (request.getName() != null) {
+            parking.setName(request.getName());
+        }
 
-        if(request.getZipcode() != null && request.getAddress() != null){
+        //우편번호와 주소는 같이 받지만 우편번호는 빈문자열 가능
+        if (request.getAddress() != null && request.getZipcode() != null) {
             parking.setZipcode(request.getZipcode());
             parking.setAddress(request.getAddress());
 
@@ -190,7 +194,8 @@ public class MemberParkingServiceImpl implements MemberParkingService {
         }
 
         //사진이 수정된다면
-        if(image != null){
+        //현재는 수정할 이미지를 꼭 받아와야 수정 가능
+        if(image != null && !image.isEmpty()){
 
             String key = parking.getImage().replace("https://parkherebucket.s3.ap-northeast-2.amazonaws.com/", "");
 
