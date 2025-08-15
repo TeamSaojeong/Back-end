@@ -11,6 +11,8 @@ public class UpdateMemberParkingRequestDto {
 
     private String name;
 
+    private String zipcode;
+
     private String address;
 
     private String image;

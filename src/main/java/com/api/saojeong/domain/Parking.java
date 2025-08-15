@@ -27,6 +27,9 @@ public class Parking extends BaseEntity{
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "zipcode")
+    private String zipcode;
+
     @Column(name = "address", nullable = false)
     private String address;
 

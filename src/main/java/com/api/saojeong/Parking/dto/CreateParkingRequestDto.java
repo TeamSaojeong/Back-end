@@ -12,6 +12,8 @@ public class CreateParkingRequestDto {
     @NotBlank(message = "주차 장소 이름을 입력해주세요.")
     private String name;
 
+    private String zipcode;
+
     @NotBlank(message = "주차 주소를 입력해주세요.")
     private String address;
 

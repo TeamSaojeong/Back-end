@@ -3,6 +3,7 @@ package com.api.saojeong.Parking.service;
 import com.api.saojeong.Member.repository.MemberRepository;
 import com.api.saojeong.Parking.dto.*;
 import com.api.saojeong.Parking.enums.ParkingKind;
+import com.api.saojeong.Parking.exception.FailGeoCodingException;
 import com.api.saojeong.Parking.exception.ParkingNotFoundException;
 import com.api.saojeong.Parking.exception.S3UploadFailedException;
 import com.api.saojeong.Parking.repository.ParkingRepository;
@@ -18,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +39,8 @@ public class MemberParkingServiceImpl implements MemberParkingService {
 //                .orElseThrow(); //예외 추가하기
 
         //좌표 변환
-        GeoResponse geo = parkingGeocodingService.getGeodoing(req.getAddress());
+        GeoResponse geo = parkingGeocodingService.getGeoCoing(req.getZipcode(), req.getAddress());
+        if(geo == null){throw new FailGeoCodingException();}
         double lat = geo.getLat();
         double lng = geo.getLng();
 
@@ -54,6 +55,7 @@ public class MemberParkingServiceImpl implements MemberParkingService {
         Parking parking = Parking.builder()
                 .member(member)
                 .name(req.getName())
+                .zipcode(req.getZipcode())
                 .address(req.getAddress())
                 .pLat(lat)
                 .pLng(lng)
@@ -156,11 +158,13 @@ public class MemberParkingServiceImpl implements MemberParkingService {
         if (request.getName() != null)
             parking.setName(request.getName() );
 
-        if (request.getAddress() != null) {
+        if(request.getZipcode() != null && request.getAddress() != null){
+            parking.setZipcode(request.getZipcode());
             parking.setAddress(request.getAddress());
 
             //좌표 변환
-            GeoResponse geo = parkingGeocodingService.getGeodoing(request.getAddress());
+            GeoResponse geo = parkingGeocodingService.getGeoCoing(request.getZipcode(), request.getAddress());
+            if(geo == null){throw new FailGeoCodingException();}
             parking.setPLat(geo.getLat());
             parking.setPLng(geo.getLng());
         }
