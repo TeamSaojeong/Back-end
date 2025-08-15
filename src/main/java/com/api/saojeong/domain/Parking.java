@@ -60,6 +60,9 @@ public class Parking extends BaseEntity{
     @Builder.Default
     private List<ParkingTime> parkingTimes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "parking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Reservation> reservations = new ArrayList<>();
+
     // 연관관계 편의 메서드 (간단 버전)
     public void addParkingTime(ParkingTime parkingTime) {
         parkingTimes.add(parkingTime);
