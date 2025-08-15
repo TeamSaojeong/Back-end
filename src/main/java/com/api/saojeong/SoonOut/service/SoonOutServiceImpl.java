@@ -11,13 +11,13 @@ import com.api.saojeong.domain.Member;
 import com.api.saojeong.domain.Parking;
 import com.api.saojeong.domain.Reservation;
 import com.api.saojeong.domain.SoonOut;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class SoonOutServiceImpl implements SoonOutService {
 
     private final ReservationRepository reservationRepository;
