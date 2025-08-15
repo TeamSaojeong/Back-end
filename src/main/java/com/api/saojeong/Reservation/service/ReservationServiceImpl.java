@@ -46,6 +46,7 @@ public class ReservationServiceImpl implements ReservationService {
         //바로 예약 가능할때
         ButtonStatus buttonStatus = ButtonStatus.AVAILABLE;
         int soonOutTime = 0;
+        int remainTime = check.getRemainTime();
 
         //예약 확인
         List<Reservation> reservations = reservationRepository.findByParkingIdAndStatus(parkingId, true);
@@ -61,6 +62,12 @@ public class ReservationServiceImpl implements ReservationService {
                     SoonOut soonOut = soonOutOpt.get();
                     buttonStatus = ButtonStatus.RESERVABLE;
                     soonOutTime = soonOut.getMinute();
+
+                    //남은 시간
+                    //10~6분 남았을때 : 현재시간에서 10분 뒤부터 시작가능
+                    //5~1분 남았을때 : 현재시간에서 5분 뒤부터 시작
+                    remainTime -= soonOutTime;
+
                 }
                 else
                     buttonStatus = ButtonStatus.USING;
@@ -71,7 +78,7 @@ public class ReservationServiceImpl implements ReservationService {
                 buttonStatus = ButtonStatus.USING;
             }
         }
-        return new GetReservationResponseDto(buttonStatus, soonOutTime, check.getRemainTime());
+        return new GetReservationResponseDto(buttonStatus, soonOutTime, remainTime);
     }
 
     //예약 추가
@@ -224,8 +231,8 @@ public class ReservationServiceImpl implements ReservationService {
             if (now.isAfter(start) && now.isBefore(end)) {
                 LocalTime lastStartTime = end.minusMinutes(10);
                 boolean check = now.isBefore(lastStartTime); //마지막 예약 가능 시간 전이면 -> true
-                int remainTime = (int) ChronoUnit.MINUTES.between(now, end);
-
+                int remainTime = (int) ChronoUnit.MINUTES.between(now, end)+1;
+                System.out.println("now : "+now+"end"+end+"="+remainTime);
                 return new OperateTimeCheck(true, check, remainTime);
             }
         }
