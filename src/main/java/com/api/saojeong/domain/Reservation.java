@@ -18,13 +18,13 @@ public class Reservation extends BaseEntity {
     @Column(name="reservation_id")
     private Long id;
 
-    @Column(name="user_start")
+    @Column(name="user_start", nullable = false)
     private LocalDateTime userStart;
 
-    @Column(name="user_end")
+    @Column(name="user_end", nullable = false)
     private LocalDateTime userEnd;
 
-    @Column(name="status")
+    @Column(name="status", nullable = false)
     private Boolean status;
 
     @ManyToOne(fetch = FetchType.LAZY)

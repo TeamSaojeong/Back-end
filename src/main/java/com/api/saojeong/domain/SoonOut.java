@@ -16,16 +16,16 @@ public class SoonOut extends BaseEntity {
     @Column(name = "soonout_id")
     Long id;
 
-    @Column(name = "lat")
+    @Column(name = "lat", nullable = false)
     private Double lat;
 
-    @Column(name = "lng")
+    @Column(name = "lng", nullable = false)
     private Double lng;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private Boolean status;
 
-    @Column(name = "minute")
+    @Column(name = "minute", nullable = false)
     private int minute;
 
     @ManyToOne(fetch = FetchType.LAZY)
