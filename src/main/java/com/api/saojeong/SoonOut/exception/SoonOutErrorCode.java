@@ -8,7 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum SoonOutErrorCode implements BaseResponseCode {
 
-    SOON_OUT_NOT_FOUND("SOON_OUT_NOT_FOUND",400 ,"곧 나가는 차량을 찾지 못하였습니다.");
+    SOON_OUT_NOT_FOUND("SOON_OUT_NOT_FOUND",404 ,"곧 나가는 차량을 찾지 못하였습니다.");
 
     private final String code;
     private final int status;
