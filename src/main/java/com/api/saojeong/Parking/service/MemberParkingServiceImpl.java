@@ -46,7 +46,7 @@ public class MemberParkingServiceImpl implements MemberParkingService {
         //사진 s3저장
         String url;
         try {
-            url = s3Service.uploadFile(image);
+            url = s3Service.uploadFile(image,"parking_lot");
         } catch (IOException e) {
             throw new S3UploadFailedException();
         }
@@ -59,7 +59,7 @@ public class MemberParkingServiceImpl implements MemberParkingService {
                 .pLng(lng)
                 .kind(ParkingKind.PERSONAL)
                 .charge(req.getCharge())
-                .photo(url)
+                .image(url)
                 .operate(true)
                 .content(req.getContent())
                 .build();
@@ -135,7 +135,7 @@ public class MemberParkingServiceImpl implements MemberParkingService {
         GetDetailMemberParkingResponseDto ResDto = GetDetailMemberParkingResponseDto.builder()
                 .parkingName(parking.getName())
                 .address(parking.getAddress())
-                .photo(parking.getPhoto())
+                .image(parking.getImage())
                 .content(parking.getContent())
                 .operateTimes(timeDtos)
                 .charge(parking.getCharge())
@@ -188,14 +188,14 @@ public class MemberParkingServiceImpl implements MemberParkingService {
         //사진이 수정된다면
         if(image != null){
 
-            String key = parking.getPhoto().replace("https://parkherebucket.s3.ap-northeast-2.amazonaws.com/", "");
-            System.out.println(key);
+            String key = parking.getImage().replace("https://parkherebucket.s3.ap-northeast-2.amazonaws.com/", "");
+
             s3Service.deleteFile(key);
 
             //사진 s3저장
             try {
-                String url = s3Service.uploadFile(image);
-                parking.setPhoto(url);
+                String url = s3Service.uploadFile(image,"parking_lot");
+                parking.setImage(url);
             } catch (IOException e) {
                 throw new S3UploadFailedException();
             }

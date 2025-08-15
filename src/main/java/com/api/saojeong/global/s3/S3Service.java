@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,8 +21,13 @@ public class S3Service {
     @Value("${app.s3.bucket}")
     private String bucket;
 
-    public String uploadFile(MultipartFile file) throws IOException {
-        String key = file.getOriginalFilename();
+    public String uploadFile(MultipartFile file, String folder) throws IOException {
+
+        //중복 방지
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+        //key 생성
+        String key = folder + "/" + fileName;
 
         PutObjectRequest putObjectReq = PutObjectRequest.builder()
                 .bucket(bucket)

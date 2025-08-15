@@ -13,7 +13,7 @@ public class UpdateMemberParkingRequestDto {
 
     private String address;
 
-    private String photo;
+    private String image;
 
     private String content;
 

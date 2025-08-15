@@ -7,7 +7,7 @@ import java.util.List;
 public record GetDetailMemberParkingResponseDto(
         String parkingName,
         String address,
-        String photo,
+        String image,
         String content,
         List<ParkingTimeDto> operateTimes,
         int charge

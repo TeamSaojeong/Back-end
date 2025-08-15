@@ -43,8 +43,8 @@ public class Parking extends BaseEntity{
     @Column(name="charge", nullable = false)
     private int charge;
 
-    @Column(name = "photo", nullable = false)
-    private String photo;
+    @Column(name = "image", nullable = false)
+    private String image;
 
     @Column(name = "content")
     private String content;
