@@ -13,5 +13,5 @@ public interface ReservationService {
     CreateReservationResponseDto createReservation(Member member, Long parkingId, CreateReservationRequestDto req);
 
     //예약시간 연장
-    CreateReservationResponseDto extendReservation(Member member, Long parkingId, Long reservationId, CreateReservationRequestDto req);
+    CreateReservationResponseDto extendReservation(Member member, Long reservationId, CreateReservationRequestDto req);
 }
