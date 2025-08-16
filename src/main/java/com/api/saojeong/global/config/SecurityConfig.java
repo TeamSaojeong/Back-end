@@ -60,7 +60,7 @@ public class SecurityConfig {
                         SessionCreationPolicy.STATELESS)) // Token 기반 인증 => session 사용 X
                 .authorizeHttpRequests((requests) -> requests
 
-                        .requestMatchers(HttpMethod.GET, "/api/parking/nearby").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/parking/*").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/login", "/api/signup").permitAll() // 허용된 주소
                         .requestMatchers("/error").permitAll()
 
