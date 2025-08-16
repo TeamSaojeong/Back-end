@@ -32,15 +32,20 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.apache.commons:commons-csv:1.10.0'
 	// 유효성 검증
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	// JWT token
 	implementation 'io.jsonwebtoken:jjwt:0.12.3'
 
 	// Spring Security OAUTH 2.1
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'com.opencsv:opencsv:5.5'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	//AWS, S3
+	implementation platform ('io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0')
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
 
 
 }

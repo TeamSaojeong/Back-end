@@ -4,6 +4,7 @@ package com.api.saojeong.global.utill.exception;
 
 
 import com.api.saojeong.global.utill.init.ErrorCode;
+import com.api.saojeong.global.utill.response.BaseResponseCode;
 import com.api.saojeong.global.utill.response.CustomApiResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -43,7 +44,7 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(CustomException.class)
     public ResponseEntity<Map<String, Object>> handleCustomException(CustomException ex) {
-        ErrorCode errorCode = ex.getErrorCode();
+        BaseResponseCode errorCode = ex.getErrorCode();
 
         Map<String, Object> errorResponse = Map.of(
                 "status", errorCode.getStatus(),

@@ -11,10 +11,12 @@
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
-
+*.properties
+src/main/resources/application.properties
+.env`
 # AWS User-specific
 .idea/**/aws.xml
-
+*.csv
 # Generated files
 .idea/**/contentModel.xml
 
