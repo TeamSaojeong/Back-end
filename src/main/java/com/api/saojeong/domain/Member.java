@@ -42,7 +42,8 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberRole> memberRoleList = new ArrayList<>();
 
-    
+    @OneToMany(mappedBy = "member",orphanRemoval = true )
+    private List<Parking> ParkingList = new ArrayList<>();
 
     public void changeRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
