@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: ["CI with Gradle"] # CI 워크플로 이름과 정확히 일치해야 함
     types: [completed] # CI가 끝났을 때 트리거
-    branches: [[main]] # 특정 브랜치에서만
+    branches: [main] # 특정 브랜치에서만
 
 permissions:
   contents: read
