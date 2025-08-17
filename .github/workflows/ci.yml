@@ -76,7 +76,7 @@ jobs:
       - name: Build & Push image
         uses: docker/build-push-action@v6
         with:
-          context: . # 현재 디렉토리를 빌드 컨텍스트로 사용
+          context: ./parkhere # 현재 디렉토리를 빌드 컨텍스트로 사용
           file: ./parkhere/Dockerfile  # Dockerfile 경로 지정
           push: true # 빌드한 이미지를 Docker Hub에 푸시
           tags: |
