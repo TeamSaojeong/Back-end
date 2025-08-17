@@ -22,8 +22,8 @@ public class ReservationScheduler {
     public void autoCheckoutReservation() {
         LocalDateTime now = LocalDateTime.now();
 
-        //종료시간 이후 5분이 지났는데도 아직 true 일때
-        List<Reservation> expiredReservations = reservationRepository.findByStatusAndUserEndBefore(true, now.minusMinutes(5));
+        //종료시간이 지났는데도 아직 true 일때
+        List<Reservation> expiredReservations = reservationRepository.findByStatusAndUserEndBefore(true, now);
 
         for(Reservation reservation : expiredReservations){
             reservation.setStatus(false);
