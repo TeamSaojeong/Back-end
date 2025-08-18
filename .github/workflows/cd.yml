@@ -26,17 +26,17 @@ jobs:
         uses: appleboy/scp-action@master  # .jar 파일 원격 서버로 복사
         with:
           username: ubuntu
-          host: ${{ secrets.SSH_HOST }}
-          key: ${{ secrets.SSH_KEY }}
+          host: ${{ secrets.SERVER_HOST }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
           source: "build/libs/*.jar" # Github Actions 워크플로우가 실행되는 runner환경에서의 경로
           target: "/home/ubuntu/hackathon/" # 원격 서버 파일 경로
 
-      - name: docker compose up -> make (mysql,spring, nginx)
+      - name: docker compose up -> make (spring, nginx)
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
+          host: ${{ secrets.SERVER_HOST }}
           username: ubuntu
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/hackathon
             docker compose up -d --build --no-deps spring
