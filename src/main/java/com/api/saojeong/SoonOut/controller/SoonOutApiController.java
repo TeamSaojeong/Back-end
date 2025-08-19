@@ -30,11 +30,12 @@ public class SoonOutApiController {
                                            @RequestParam(required = false) String provider,    // 외부
                                            @RequestParam(required = false) String externalId,
                                            @RequestParam(required = false) Long reservationId,
-                                           @RequestParam(required = false) String placeName) {
+                                           @RequestParam(required = false) String placeName,
+                                           @RequestParam(required=false)String address) {
         Parking parking = (parkingId != null) ? parkingRepo.findById(parkingId).orElse(null) : null;
         Reservation res = (reservationId != null) ? reservationRepo.findById(reservationId).orElse(null) : null;
 
-        Long id = alertService.createSoonOut(lat, lng, minute, status, parking, provider, externalId, res, placeName);
+        Long id = alertService.createSoonOut(lat, lng, minute, status, parking, provider, externalId, res, placeName,address);
         return ResponseEntity.ok(CustomApiResponse.createSuccess(HttpStatus.OK.value(),
                 java.util.Map.of("id", id), "곧나감 등록 및 거리 규칙 기반 알림 발송 처리"));
     }

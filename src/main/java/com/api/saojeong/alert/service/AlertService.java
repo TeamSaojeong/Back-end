@@ -57,7 +57,7 @@ public class AlertService {
     @Transactional
     public Long createSoonOut(Double lat, Double lng, int minute, boolean status,
                               Parking parking, String provider, String externalId, Reservation reservation,
-                              String placeNameOptional) {
+                              String placeNameOptional,String address) {
 
         log.info("[SOONOUT][REQ] lat={}, lng={}, minute={}, status={}, parkingId={}, provider={}, externalId={}, reservationId={}, placeName={}",
                 lat, lng, minute, status,
@@ -74,33 +74,32 @@ public class AlertService {
                 .provider(provider)
                 .externalId(externalId)
                 .reservation(reservation)
+                .placeName(placeNameOptional)
                 .build();
         so = soonRepo.save(so);
 
-        log.info("[SOONOUT][SAVED] soonOutId={}, target={}",
-                so.getId(),
-                parking != null ? ("parkingId=" + parking.getId()) : (provider + ":" + externalId));
+
 
         // 대상 구독자 (현재 로직 유지)
         List<AlertSubscription> subs = subRepo.findByProviderAndExternalIdAndActiveIsTrue(provider, externalId);
-        log.info("[SOONOUT:{}] subs(provider/external) found={}", so.getId(), subs.size());
+
         if (subs.isEmpty()) {
             List<AlertSubscription> subs1 = subRepo.findByParkingAndActiveIsTrue(parking);
-            log.info("[SOONOUT:{}] subs(parkingId) found={}", so.getId(), subs1 != null ? subs1.size() : null);
+
             if (subs.isEmpty()) {
-                log.info("[SOONOUT:{}] no subscription matches → exit", so.getId());
+
                 return so.getId();
             }
         }
 
         // 위치 로드
         var memberIds = subs.stream().map(s -> s.getMember().getId()).collect(Collectors.toSet());
-        log.info("[SOONOUT:{}] memberIds for location load = {}", so.getId(), memberIds);
+
 
         var locs = locationRepo.findByMemberIdIn(memberIds).stream()
                 .collect(Collectors.toMap(l -> l.getMember().getId(), l -> l));
 
-        log.info("[SOONOUT:{}] locations loaded = {}", so.getId(), locs.size());
+
 
         var now = OffsetDateTime.now(ZoneId.of("Asia/Seoul"));
         int sentCnt = 0;
@@ -111,19 +110,18 @@ public class AlertService {
 
             if (s.getExpiresAt() != null && s.getExpiresAt().isBefore(now)) {
                 skippedExpired++;
-                log.info("[SOONOUT:{}][MEM:{}] skip: expired at {}", so.getId(), memId, s.getExpiresAt());
+
                 continue;
             }
             if (s.getMinMinutes() != null && minute < s.getMinMinutes()) {
                 skippedMin++;
-                log.info("[SOONOUT:{}][MEM:{}] skip: minute {} < minMinutes {}", so.getId(), memId, minute, s.getMinMinutes());
+
                 continue;
             }
 
             var loc = locs.get(memId);
             if (loc == null) {
                 skippedNoLoc++;
-                log.info("[SOONOUT:{}][MEM:{}] skip: no location", so.getId(), memId);
                 continue;
             }
 
@@ -132,13 +130,10 @@ public class AlertService {
                 var age = Duration.between(loc.getUpdatedAt(), now).abs();
                 if (age.compareTo(LOCATION_TTL) > 0) {
                     skippedOldLoc++;
-                    log.info("[SOONOUT:{}][MEM:{}] skip: location too old {} min (TTL={} min)",
-                            so.getId(), memId, age.toMinutes(), LOCATION_TTL.toMinutes());
                     continue;
                 }
             } catch (Exception e) {
-                log.warn("[SOONOUT:{}][MEM:{}] WARN: location age calc failed (updatedAt={}, now={}) → continue",
-                        so.getId(), memId, loc.getUpdatedAt(), now, e);
+
                 // 계산 실패 시 그냥 통과시키고 아래 거리 체크 진행
             }
 
@@ -149,8 +144,7 @@ public class AlertService {
             } else if (dist <= KM_2) {
                 shouldSend = (minute == 10);
             }
-            log.info("[SOONOUT:{}][MEM:{}] dist={}m minute={} shouldSend={}",
-                    so.getId(), memId, Math.round(dist), minute, shouldSend);
+
             if (!shouldSend) {
                 skippedDistance++;
                 continue;
@@ -159,39 +153,37 @@ public class AlertService {
             var exists = eventRepo.findBySoonOutIdAndMemberId(so.getId(), memId);
             if (exists.isPresent()) {
                 skippedDup++;
-                log.info("[SOONOUT:{}][MEM:{}] skip: already sent", so.getId(), memId);
+
                 continue;
             }
 
             String email = s.getMember().getMemberId(); // 현 로직 유지(이 값이 이메일이 아닐 가능성 높음)
-            log.info("[SOONOUT:{}][MEM:{}] email(candidate)='{}'", so.getId(), memId, email);
+
 
             if (email == null || email.isBlank()) {
                 skippedNoEmail++;
-                log.info("[SOONOUT:{}][MEM:{}] skip: empty email", so.getId(), memId);
+
                 continue;
             }
 
             String placeName = (parking != null && parking.getName() != null)
                     ? parking.getName()
-                    : (placeNameOptional != null ? placeNameOptional : (provider + ":" + externalId));
+                    : placeNameOptional;
 
             try {
-                notifier.sendSoonOutEmail(email, placeName, lat, lng, minute);
+                notifier.sendSoonOutEmail(email, placeName, minute,address);
                 eventRepo.save(NotificationEvent.builder()
                         .soonOutId(so.getId())
                         .member(s.getMember())
                         .sent(true)
                         .build());
                 sentCnt++;
-                log.info("[SOONOUT:{}][MEM:{}] email SENT to {}", so.getId(), memId, email);
+
             } catch (Exception e) {
-                log.error("[SOONOUT:{}][MEM:{}] email SEND FAILED to {} -> {}", so.getId(), memId, email, e.getMessage(), e);
+
             }
         }
 
-        log.info("[SOONOUT:{}] summary: sent={}, skippedExpired={}, skippedMin={}, skippedNoLoc={}, skippedOldLoc={}, skippedDistance={}, skippedDup={}, skippedNoEmail={}",
-                so.getId(), sentCnt, skippedExpired, skippedMin, skippedNoLoc, skippedOldLoc, skippedDistance, skippedDup, skippedNoEmail);
 
         return so.getId();
     }
