@@ -20,7 +20,7 @@ public class Report extends BaseEntity {
     @Column(name="report_num")
     private String carNum;
 
-    @Column(name="report_image")
+    @Column(name="report_image" , length = 1000)
     private String image;
 
     @Enumerated(value = EnumType.STRING)
