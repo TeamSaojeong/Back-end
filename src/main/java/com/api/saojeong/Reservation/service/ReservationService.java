@@ -17,5 +17,5 @@ public interface ReservationService {
     CreateReservationResponseDto extendReservation(Member member, Long reservationId, CreateReservationRequestDto req);
 
     //출차하기
-    CheckOutReservationResponseDto checkoutReservation(Member member, Long reservationId);
+//    CheckOutReservationResponseDto checkoutReservation(Member member, Long reservationId);
 }
