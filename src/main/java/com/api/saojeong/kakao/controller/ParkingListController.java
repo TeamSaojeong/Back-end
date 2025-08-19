@@ -31,24 +31,29 @@ public class ParkingListController {
         return service.searchNearbyParking(lat, lon, radius, page, size, sort);
     }
     @GetMapping("/detail")
-    public Mono<ResponseEntity<CustomApiResponse<?>>> detail(
+    public Mono<ResponseEntity<CustomApiResponse<ParkingWithRate>>> detail(
             @RequestParam String kakaoId,
             @RequestParam double lat,
             @RequestParam double lon,
-            @RequestParam(defaultValue = "80") int radius    // 작은 반경에서 재검색
+            @RequestParam(defaultValue = "80") int radius
     ) {
         return service.searchNearbyParking(lat, lon, Math.max(radius, 50), 1, 15, "distance")
-                .map(list -> list.stream().filter(p -> kakaoId.equals(p.id())).findFirst().orElse(null))
-                .map(item -> {
-                    if (item == null) {
-                        return ResponseEntity.status(HttpStatus.OK)
-                                .body(CustomApiResponse.createSuccessWithoutData(HttpStatus.OK.value(), "해당 ID의 주차장을 찾지 못했습니다."));
-                    } else {
-                        return ResponseEntity.status(HttpStatus.OK)
-                                .body(CustomApiResponse.createSuccess(HttpStatus.OK.value(), item, "주차 상세 조회 성공"));
-                    }
-                });
+                // list -> Mono<ParkingWithRate> (없으면 empty)
+                .flatMap(list -> Mono.justOrEmpty(
+                        list.stream().filter(p -> kakaoId.equals(p.id())).findFirst()
+                ))
+                // 있으면 성공 응답
+                .map(item -> ResponseEntity.ok(
+                        CustomApiResponse.createSuccess(HttpStatus.OK.value(), item, "주차 상세 조회 성공")
+                ))
+                // 없으면 not found 메시지 (200 + 메시지 유지)
+                .switchIfEmpty(Mono.just(
+                        ResponseEntity.ok(
+                                CustomApiResponse.createSuccessWithoutData(HttpStatus.OK.value(), "해당 ID의 주차장을 찾지 못했습니다.")
+                        )
+                ));
     }
+
     @GetMapping("/avg")
     public Mono<ResponseEntity<CustomApiResponse<?>>> avgFeePer10m(
             @RequestParam double lat,
