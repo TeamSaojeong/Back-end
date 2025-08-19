@@ -67,16 +67,17 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 // CORS
-                .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOriginPatterns(Collections.singletonList("*"));
-                    config.setAllowedMethods(Collections.singletonList("*"));
-                    config.setAllowCredentials(true);
-                    config.setAllowedHeaders(Collections.singletonList("*"));
-                    config.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh"));
-                    config.setMaxAge(3600L);
-                    return config;
-                }));
+//                .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
+//                    CorsConfiguration config = new CorsConfiguration();
+//                    config.setAllowedOriginPatterns(Collections.singletonList("*"));
+//                    config.setAllowedMethods(Collections.singletonList("*"));
+//                    config.setAllowCredentials(true);
+//                    config.setAllowedHeaders(Collections.singletonList("*"));
+//                    config.setExposedHeaders(Arrays.asList("Authorization", "Authorization-refresh"));
+//                    config.setMaxAge(3600L);
+//                    return config;
+//                }));
+                .cors(AbstractHttpConfigurer::disable);
         http.addFilterAfter(customUsernamePwdAuthenticationFilter(), LogoutFilter.class);
         http.addFilterBefore(jwtAuthenticationProcessingFilter(), CustomUsernamePwdAuthenticationFilter.class);
 

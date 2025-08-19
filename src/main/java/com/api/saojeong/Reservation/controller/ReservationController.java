@@ -68,17 +68,17 @@ public class ReservationController {
     }
 
     //출차하기를 눌렀을때
-    @PatchMapping("/reservation/{reservationId}/checkout")
-    public ResponseEntity<CustomApiResponse<?>> checkoutReservation(@LoginMember Member member,
-                                                                    @PathVariable Long reservationId){
-        CheckOutReservationResponseDto res = reservationService.checkoutReservation(member, reservationId);
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(CustomApiResponse.createSuccess(
-                        HttpStatus.OK.value(),
-                        res,
-                        "출차 성공"
-                ));
-    }
+//    @PatchMapping("/reservation/{reservationId}/checkout")
+//    public ResponseEntity<CustomApiResponse<?>> checkoutReservation(@LoginMember Member member,
+//                                                                    @PathVariable Long reservationId){
+//        CheckOutReservationResponseDto res = reservationService.checkoutReservation(member, reservationId);
+//        return ResponseEntity
+//                .status(HttpStatus.OK)
+//                .body(CustomApiResponse.createSuccess(
+//                        HttpStatus.OK.value(),
+//                        res,
+//                        "출차 성공"
+//                ));
+//    }
 
 }
