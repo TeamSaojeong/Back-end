@@ -23,7 +23,7 @@ public class NotificationService {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setFrom(from);
             msg.setTo(to);
-            msg.setSubject("[사오정] 곧 나감 알림");
+            msg.setSubject("[PARKHERE] 곧 나감 알림");
             msg.setText(String.format("%s에서 %d분 내로 자리가 날 예정입니다.\n주소: %s",
                     placeName, minute, address));
             mailSender.send(msg);
