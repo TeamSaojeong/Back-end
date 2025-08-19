@@ -1,6 +1,7 @@
 package com.api.saojeong.kakao.controller;
 import com.api.saojeong.SoonOut.respotiory.SoonOutRepository;
 import com.api.saojeong.alert.repository.AlertSubscriptionRepository;
+import com.api.saojeong.domain.Member;
 import com.api.saojeong.global.security.LoginMember;
 import com.api.saojeong.global.utill.response.CustomApiResponse;
 import com.api.saojeong.kakao.csvdata.ParkingWithRate;
@@ -42,7 +43,7 @@ public class ParkingListController {
             @RequestParam double lat,
             @RequestParam double lon,
             @RequestParam(defaultValue = "80") int radius,
-            @LoginMember Long memberId
+            @LoginMember Member memberId
     ) {
         Mono<ParkingWithRate> itemMono = service.searchNearbyParking(lat, lon, Math.max(radius, 50), 1, 15, "distance")
                 .flatMap(list -> Mono.justOrEmpty(
@@ -53,10 +54,10 @@ public class ParkingListController {
                 Mono.fromCallable(() -> soonOutRepository.existsByProviderAndExternalId("kakao", kakaoId))
                         .subscribeOn(Schedulers.boundedElastic());
 
-        Mono<Boolean> subscribedExistsMono = (memberId == null)
+        Mono<Boolean> subscribedExistsMono = (memberId.getMemberId() == null)
                 ? Mono.just(false)
                 : Mono.fromCallable(() ->
-                        subRepository.existsByMember_IdAndProviderAndExternalIdAndActiveIsTrue(memberId, "kakao", kakaoId))
+                        subRepository.existsByMember_IdAndProviderAndExternalIdAndActiveIsTrue(memberId.getId(), "kakao", kakaoId))
                 .subscribeOn(Schedulers.boundedElastic());
 
         return Mono.zip(itemMono, soonOutExistsMono, subscribedExistsMono)
