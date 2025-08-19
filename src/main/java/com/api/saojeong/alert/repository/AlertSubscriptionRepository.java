@@ -15,4 +15,7 @@ public interface AlertSubscriptionRepository extends JpaRepository<AlertSubscrip
     List<AlertSubscription> findByMemberAndActiveIsTrue(Member member);
     // ✅ 'IsFalse' 는 상수 조건이므로 파라미터를 받지 않습니다.
     long deleteByActiveIsFalseOrExpiresAtBefore(OffsetDateTime cutoff);
+    boolean existsByMember_IdAndProviderAndExternalIdAndActiveIsTrue(Long memberId, String provider, String externalId);
+    boolean existsByMember_IdAndParking_IdAndActiveIsTrue(Long memberId, Long parkingId);
+
 }
