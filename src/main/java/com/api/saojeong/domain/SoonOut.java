@@ -17,6 +17,8 @@ public class SoonOut extends BaseEntity {
     @Column(name = "soonout_id")
     private Long id;
 
+    @Column(name="placeName")
+    private String placeName;
     // 위치(외부/내부 공통)
     @Column(name = "lat", nullable = false)
     private Double lat;
@@ -24,6 +26,8 @@ public class SoonOut extends BaseEntity {
     @Column(name = "lng", nullable = false)
     private Double lng;
 
+    @Column(name="address")
+    private String address;
     // 곧나감 남김(활성) 여부
     @Column(name = "status", nullable = false)
     private Boolean status;
