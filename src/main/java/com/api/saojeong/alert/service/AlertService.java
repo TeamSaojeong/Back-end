@@ -86,6 +86,8 @@ public class AlertService {
                     .lat(lat).lng(lng)
                     .minute(minute)
                     .status(status)
+                    .provider(provider)
+                    .externalId(externalId)
                     .reservation(reservation)
                     .placeName(placeNameOptional)
                     .build();

@@ -54,6 +54,7 @@ public class ParkingListController {
                 Mono.fromCallable(() -> soonOutRepository.existsByProviderAndExternalId("kakao", kakaoId))
                         .subscribeOn(Schedulers.boundedElastic());
 
+
         Mono<Boolean> subscribedExistsMono = (memberId.getMemberId() == null)
                 ? Mono.just(false)
                 : Mono.fromCallable(() ->

@@ -42,12 +42,12 @@ public class SoonOut extends BaseEntity {
     @JoinColumn(name = "parking_id")
     private Parking parking;
 
-//    // 외부 주차장 식별(카카오 등) — parking 이 null일 때 사용
-//    @Column(name = "provider", length = 32)
-//    private String provider;       // 예: "KAKAO"
-//
-//    @Column(name = "external_id", length = 128)
-//    private String externalId;     // 예: kakao place_id
+    // 외부 주차장 식별(카카오 등) — parking 이 null일 때 사용
+    @Column(name = "provider", length = 32)
+    private String provider;       // 예: "KAKAO"
+
+    @Column(name = "external_id", length = 128)
+    private String externalId;     // 예: kakao place_id
 
     // (선택) 예약과의 연결 — 내부 주차 사용 중일 때만
     @ManyToOne(fetch = FetchType.LAZY)
