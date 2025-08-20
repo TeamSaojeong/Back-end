@@ -11,6 +11,8 @@ import javax.crypto.SecretKey;
 import com.api.saojeong.Member.repository.MemberRepository;
 import com.api.saojeong.global.utill.response.CustomApiResponse;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -125,19 +127,28 @@ public class JwtService {
     /**
      * AccessToken에서 LoginId 추출
      */
+    /** AccessToken에서 LoginId 추출 (만료/서명오류 등은 empty) */
     public Optional<String> extractLoginId(String accessToken) {
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(key)       // ★ 0.12.x
+                    .build()
+                    .parseSignedClaims(accessToken)
+                    .getPayload();
 
-        SecretKey key = Keys.hmacShaKeyFor(
-                secretKey.getBytes(StandardCharsets.UTF_8));
-
-        Claims claims = Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(accessToken)
-                .getPayload();
-        System.out.println(Optional.ofNullable(String.valueOf(claims.get("loginId"))));
-        return Optional.ofNullable(String.valueOf(claims.get("loginId")));
+            String loginId = claims.get(LOGINID_CLAIM, String.class);
+            log.debug("extractLoginId -> {}", loginId);
+            return Optional.ofNullable(loginId);
+        } catch (ExpiredJwtException e) {
+            log.warn("만료된 토큰: {}", e.getMessage());
+            return Optional.empty();
+        } catch (JwtException | IllegalArgumentException e) {
+            log.warn("유효하지 않은 토큰: {}", e.getMessage());
+            return Optional.empty();
+        }
     }
+
 
     /**
      * AccessToken 헤더 설정
@@ -167,16 +178,19 @@ public class JwtService {
     /**
      * 유효한 서명의 토큰인지 검증
      */
+    /** 유효한 서명/만료 여부만 boolean으로 리턴 */
     public boolean isTokenValid(String token) {
-        SecretKey key = Keys.hmacShaKeyFor(
-                secretKey.getBytes(StandardCharsets.UTF_8));
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
         try {
-            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parser()
+                    .verifyWith(key)          // ★ 0.12.x
+                    .build()
+                    .parseSignedClaims(token);
             return true;
-        } catch (Exception e) {
-            log.error("유효하지 않은 토큰입니다. {}", e.getMessage());
-            CustomApiResponse<?> failWithout = CustomApiResponse.createFailWithout(401, "유효하지 않은 토큰입니다.");
-            return ResponseEntity.status(401).body(failWithout).hasBody();
+        } catch (JwtException | IllegalArgumentException e) {
+            // ExpiredJwtException 포함 → false
+            log.warn("토큰 검증 실패: {}", e.getMessage());
+            return false;
         }
     }
 

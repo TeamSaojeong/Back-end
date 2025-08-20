@@ -8,6 +8,8 @@ import com.api.saojeong.Member.repository.MemberRepository;
 import com.api.saojeong.Member.service.MemberQueryService;
 import com.api.saojeong.global.handler.JwtLoginFailureHandler;
 import com.api.saojeong.global.handler.JwtLoginSuccessHandler;
+import com.api.saojeong.global.handler.RestAccessDeniedHandler;
+import com.api.saojeong.global.handler.RestAuthenticationEntryPoint;
 import com.api.saojeong.global.security.CustomUsernamePwdAuthenticationFilter;
 import com.api.saojeong.global.security.JwtAuthenticationFilter;
 import com.api.saojeong.global.security.JwtService;
@@ -25,6 +27,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -49,6 +52,8 @@ public class SecurityConfig {
     private final JwtLoginSuccessHandler jwtLoginSuccessHandler;
     private final JwtLoginFailureHandler jwtLoginFailureHandler;
     private final MemberQueryService memberQueryService;
+    private final RestAuthenticationEntryPoint authEntryPoint;
+    private final RestAccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -66,6 +71,11 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(ex->ex
+                        .authenticationEntryPoint(authEntryPoint)   // 401
+                        .accessDeniedHandler(accessDeniedHandler)
+                )
+                .addFilterBefore(jwtAuthenticationProcessingFilter(), UsernamePasswordAuthenticationFilter.class)
                 // CORS
 //                .cors(corsCustomizer -> corsCustomizer.configurationSource(request -> {
 //                    CorsConfiguration config = new CorsConfiguration();
@@ -113,7 +123,7 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationProcessingFilter() {
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService,
-                memberRepository, memberQueryService);
+                memberRepository, memberQueryService,authEntryPoint);
         return jwtAuthenticationFilter;
     }
 

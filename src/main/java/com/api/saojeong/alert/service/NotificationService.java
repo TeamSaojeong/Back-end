@@ -30,4 +30,18 @@ public class NotificationService {
         } catch (Exception e) {
             log.error("Failed to send email to {}: {}", to, e.getMessage());
         }
-    }}
+    }
+    public void sendReservationEndingEmail(String to, String placeName, int minute) {
+        try {
+            SimpleMailMessage msg = new SimpleMailMessage();
+            msg.setFrom(from);
+            msg.setTo(to);
+            msg.setSubject("[PARKHERE] 사용시간 종료 임박 알림");
+            msg.setText(String.format("%s에서 %d분후 사용시간이 종료될 예정입니다.",
+                    placeName, minute));
+            mailSender.send(msg);
+        } catch (Exception e) {
+            log.error("Failed to send email to {}: {}", to, e.getMessage());
+        }
+    }
+}

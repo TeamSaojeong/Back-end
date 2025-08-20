@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface NotificationEventRepository extends JpaRepository<NotificationEvent, Long> {
     Optional<NotificationEvent> findBySoonOutIdAndMemberId(Long soonOutId, Long memberId);
+    boolean existsByTypeAndReservationId(String type, Long reservationId);
+
 }
