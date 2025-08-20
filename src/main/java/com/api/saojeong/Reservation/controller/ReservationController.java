@@ -35,8 +35,8 @@ public class ReservationController {
                 ));
     }
 
-    //예약 시간 추가
-    @PostMapping("/parking/{parkingId}/reservation")
+    //개인 예약 시간 추가
+    @PostMapping("/parking/{parkingId}/personal-reservation")
     public ResponseEntity<CustomApiResponse<?>> createReservation(@LoginMember Member member,
                                                                   @PathVariable Long parkingId,
                                                                   @RequestBody CreateReservationRequestDto req){
@@ -52,6 +52,23 @@ public class ReservationController {
                 ));
     }
 
+    //공영/민영 이용시간 추가
+    @PostMapping("/parking/public-private")
+    public ResponseEntity<CustomApiResponse<?>> createPubPriReservation(@LoginMember Member member,
+                                                                        @RequestBody CreateReservationRequestDto req){
+
+        CreateReservationResponseDto res = reservationService.createPubPriReservation(member, req);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(CustomApiResponse.createSuccess(
+                        HttpStatus.CREATED.value(),
+                        res,
+                        "예약 성공"
+                ));
+    }
+
+    //이것도 수정
     //연장하기
     @PatchMapping("/reservation/{reservationId}/extend")
     public ResponseEntity<CustomApiResponse<?>> extendReservation(@LoginMember Member member,
