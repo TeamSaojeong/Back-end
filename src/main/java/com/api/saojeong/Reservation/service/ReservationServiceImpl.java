@@ -1,6 +1,5 @@
 package com.api.saojeong.Reservation.service;
 
-import com.api.saojeong.Parking.enums.ParkingKind;
 import com.api.saojeong.Parking.exception.ParkingNotFoundException;
 import com.api.saojeong.Parking.repository.ParkingRepository;
 import com.api.saojeong.Parking.repository.ParkingTimeRepository;
@@ -81,7 +80,7 @@ public class ReservationServiceImpl implements ReservationService {
         return new GetReservationResponseDto(buttonStatus, soonOutTime, remainTime);
     }
 
-    //예약 추가
+    //개인 예약 추가
     @Override
     public CreateReservationResponseDto createReservation(Member member, Long parkingId, CreateReservationRequestDto req) {
         //주차장 존재 확인
@@ -107,7 +106,6 @@ public class ReservationServiceImpl implements ReservationService {
         //그냥 예약 데이터를 저장하고 결제?
 
         //개인
-        if(parking.getKind() == ParkingKind.PERSONAL){
             //예약이 있는지 확인
             //2개가 있을 수 없는 구조 (-> 버튼에서 확인 후 넘어옴)
             Optional<Reservation> reservation = reservationRepository.findFirstByParkingIdAndStatus(parkingId,true);
@@ -142,17 +140,7 @@ public class ReservationServiceImpl implements ReservationService {
                     .userEnd(startTime.plusMinutes(req.getUsingMinutes()))
                     .status(true)
                     .build();
-        }
-        else{
-            //민영, 공영
-            rev = Reservation.builder()
-                    .member(member)
-                    .parking(parking)
-                    .userStart(now)
-                    .userEnd(now.plusMinutes(req.getUsingMinutes()))
-                    .status(true)
-                    .build();
-        }
+
 
         Reservation res = reservationRepository.save(rev);
 
@@ -160,6 +148,34 @@ public class ReservationServiceImpl implements ReservationService {
                 res.getId(),
                 res.getMember().getId(),
                 res.getParking().getName(),
+                res.getUserStart().toLocalTime(),
+                res.getUserEnd().toLocalTime(),
+                req.getUsingMinutes());
+    }
+
+    //공영, 민영 예약 추가
+    @Override
+    public CreateReservationResponseDto createPubPriReservation(Member member,CreateReservationRequestDto req) {
+
+        //카카오 확인
+
+        LocalDateTime now = LocalDateTime.now();
+
+        Reservation reservation = Reservation.builder()
+                .member(member)
+                .externalId(req.getExternalId())
+                .provider(req.getProvider())
+                .userStart(now)
+                .userEnd(now.plusMinutes(req.getUsingMinutes()))
+                .status(true)
+                .build();
+
+        Reservation res = reservationRepository.save(reservation);
+
+        return new CreateReservationResponseDto(
+                res.getId(),
+                res.getMember().getId(),
+                req.getPlacename(),
                 res.getUserStart().toLocalTime(),
                 res.getUserEnd().toLocalTime(),
                 req.getUsingMinutes());
@@ -194,11 +210,13 @@ public class ReservationServiceImpl implements ReservationService {
         return new CreateReservationResponseDto(
                 res.getId(),
                 res.getMember().getId(),
-                res.getParking().getName(),
+                req.getPlacename(),
                 res.getUserStart().toLocalTime(),
                 res.getUserEnd().toLocalTime(),
                 req.getUsingMinutes());
     }
+
+
 
     //출차하기
 //    @Transactional

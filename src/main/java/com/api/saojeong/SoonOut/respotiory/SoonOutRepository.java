@@ -15,4 +15,7 @@ public interface SoonOutRepository extends JpaRepository<SoonOut,Long> {
     Optional<SoonOut> findByIdAndStatus(Long soonOutId, boolean b);
 
     SoonOut findByReservationIdAndParkingId(Long reservationId, Long id);
+    boolean existsByProviderAndExternalId(String provider, String externalId);
+    boolean existsByParking_Id(Long parkingId);
+
 }

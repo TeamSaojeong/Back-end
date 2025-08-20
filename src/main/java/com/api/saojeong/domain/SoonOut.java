@@ -19,6 +19,7 @@ public class SoonOut extends BaseEntity {
 
     @Column(name="placeName")
     private String placeName;
+
     // 위치(외부/내부 공통)
     @Column(name = "lat", nullable = false)
     private Double lat;
