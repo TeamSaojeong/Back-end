@@ -66,16 +66,30 @@ public class AlertService {
                 reservation != null ? reservation.getId() : null,
                 placeNameOptional);
 
-        SoonOut so = SoonOut.builder()
-                .lat(lat).lng(lng)
-                .minute(minute)
-                .status(status)
-                .parking(parking)
-                .provider(provider)
-                .externalId(externalId)
-                .reservation(reservation)
-                .placeName(placeNameOptional)
-                .build();
+        SoonOut so ;
+        //개인이면
+        if(parking !=null){
+            so = SoonOut.builder()
+                    .lat(lat)
+                    .lng(lng)
+                    .minute(minute)
+                    .status(status)
+                    .parking(parking)
+                    .reservation(reservation)
+                    .placeName(placeNameOptional)
+                    .address(address)
+                    .build();
+        }
+        else { //공영,민영
+
+            so = SoonOut.builder()
+                    .lat(lat).lng(lng)
+                    .minute(minute)
+                    .status(status)
+                    .reservation(reservation)
+                    .placeName(placeNameOptional)
+                    .build();
+        }
         so = soonRepo.save(so);
 
 
