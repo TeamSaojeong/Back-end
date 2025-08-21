@@ -10,4 +10,5 @@ public interface NotificationEventRepository extends JpaRepository<NotificationE
     Optional<NotificationEvent> findBySoonOutIdAndMemberId(Long soonOutId, Long memberId);
     boolean existsByTypeAndReservationId(NotificationType type, Long reservationId);
 
+    boolean existsByTypeAndSoonOutIdAndMemberId(NotificationType notificationType, Long id, Long memId);
 }
