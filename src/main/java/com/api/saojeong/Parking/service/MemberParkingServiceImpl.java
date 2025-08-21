@@ -85,7 +85,7 @@ public class MemberParkingServiceImpl implements MemberParkingService {
                 .toList();
 
 
-        return new CreateParkingResponseDto(res.getId(), res.getName(), timeDtos, res.getCharge());
+        return new CreateParkingResponseDto(res.getId(), res.getName(), timeDtos, res.getCharge(),res.getPLat(),res.getPLng());
     }
 
     //개인 주차장 관리 화면 조회
@@ -218,6 +218,6 @@ public class MemberParkingServiceImpl implements MemberParkingService {
                 ))
                 .toList();
 
-        return new CreateParkingResponseDto(parking.getId(), parking.getName(), timeDtos, parking.getCharge());
+        return new CreateParkingResponseDto(parking.getId(), parking.getName(), timeDtos, parking.getCharge(), parking.getPLat(), parking.getPLng());
     }
 }

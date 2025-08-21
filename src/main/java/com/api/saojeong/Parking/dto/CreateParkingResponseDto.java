@@ -16,4 +16,7 @@ public class CreateParkingResponseDto {
     private List<ParkingTimeDto> operateTimes;
     private int charge;
 
+    private double lat;
+    private double lng;
+
 }
