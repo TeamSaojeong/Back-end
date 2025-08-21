@@ -30,7 +30,7 @@ public class HousekeeperScheduler {
     private final NotificationService notifier;
 
     private static final int BATCH_LIMIT = 200;
-    private static final String EVT_RESERVATION_10M = "RESERVATION_10M";
+    //private static final String EVT_RESERVATION_10M = "RESERVATION_10M";
 
     @Scheduled(fixedRate = 60_000)
     @SchedulerLock(name = "housekeeper:minute", lockAtMostFor = "PT50S", lockAtLeastFor = "PT10S")
@@ -100,13 +100,13 @@ public class HousekeeperScheduler {
         int sent = 0, skipped = 0;
         for (Reservation r : targets) {
             Long resId = r.getId();
-            if (eventRepository.existsByTypeAndReservationId(EVT_RESERVATION_10M, resId)) {
+            if (eventRepository.existsByTypeAndReservationId(NotificationType.RESERVATION_10M, resId)) {
                 skipped++;
                 continue;
             }
 
             String email = r.getMember() != null ? r.getMember().getMemberId() : null; // 실제 이메일 컬럼로 교체 권장
-            String placeName = (r.getParking() != null) ? r.getParking().getName() : "예약 주차장";
+            String placeName = (r.getParking() != null) ? r.getParking().getName() : "사용중인 주차장";
             if (email == null || email.isBlank()) {
                 skipped++;
                 continue;

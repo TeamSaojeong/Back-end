@@ -24,9 +24,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     // 종료 10분 전 윈도우(1분 폭) & 아직 진행중(status=true)
     @Query("""
-        SELECT r FROM Reservation r
-        WHERE r.status = true
-          AND r.userEnd BETWEEN :from AND :to
+      select r
+      from Reservation r
+      join fetch r.member m
+      left join fetch r.parking p
+      where r.status = true
+        and r.userEnd >= :from and r.userEnd < :to
     """)
     List<Reservation> findEndInWindow(@Param("from") LocalDateTime from,
                                       @Param("to") LocalDateTime to);

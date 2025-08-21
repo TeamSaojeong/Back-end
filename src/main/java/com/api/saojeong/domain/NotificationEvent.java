@@ -33,7 +33,7 @@ public class NotificationEvent extends BaseEntity {
     private NotificationType type;
 
     /** SoonOut 기반 알림이면 채움, 아니라면 null */
-    @Column(name = "soonout_id")
+    @Column(name = "soonout_id", nullable = true)
     private Long soonOutId;
 
     /** 예약 기반 알림이면 채움, 아니라면 null */
