@@ -1,6 +1,10 @@
 // ParkingSearchService.java (컨트롤러 변경 없이 작동)
 package com.api.saojeong.kakao.service;
 
+import com.api.saojeong.Parking.repository.ParkingRepository;
+import com.api.saojeong.Reservation.dto.OperateTimeCheck;
+import com.api.saojeong.domain.Parking;
+import com.api.saojeong.domain.ParkingTime;
 import com.api.saojeong.kakao.csvdata.ParkingRateIndex;
 import com.api.saojeong.kakao.csvdata.ParkingWithRate;
 import com.api.saojeong.kakao.csvdata.RateInfo;
@@ -10,76 +14,156 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 public class ParkingSearchService {
     private final WebClient kakaoWebClient;
     private final ParkingRateIndex rateIndex;
+    private final ParkingRepository parkingRepository;
 
     // ✅ 시그니처 그대로 유지 (컨트롤러 수정 불필요)
     public Mono<List<ParkingWithRate>> searchNearbyParking(double lat, double lon, int radiusMeters,
                                                            int page, int size, String sort) {
 
         // 1) 역지오코딩으로 "가고자 하는 건물명" 자동 추출
-        return resolveBuildingName(lat, lon)
-                .defaultIfEmpty("")
-                // 2) 주변 주차장 조회
-                .flatMap(buildingName ->
-                        kakaoWebClient.get()
-                                .uri(uri -> uri
-                                        .path("/v2/local/search/category.json")
-                                        .queryParam("category_group_code", "PK6")
-                                        .queryParam("x", lon)        // 경도
-                                        .queryParam("y", lat)        // 위도
-                                        .queryParam("radius", radiusMeters)
-                                        .queryParam("page", page)    // 1~45
-                                        .queryParam("size", size)    // 1~15
-                                        .queryParam("sort", sort)    // distance 권장
-                                        .build())
-                                .retrieve()
-                                .bodyToMono(KakaoSearchResponse.class)
-                                // 3) CSV 요금 매칭 + 스코어 계산용 확장 모델로 변환
-                                .map(resp -> resp.documents().stream().map(doc -> {
-                                    Double dx = parseDouble(doc.x());
-                                    Double dy = parseDouble(doc.y());
-                                    Integer dist = parseInt(doc.distance());
+        Mono<String> buildingNameMono = resolveBuildingName(lat, lon).defaultIfEmpty("");
 
-                                    // CSV에서 요금 매칭 (이름 정규화 + 좌표 가까운 지점 우선)
-                                    Optional<RateInfo> rate = rateIndex.findBest(doc.placeName(), dy, dx);
+        // 2) 카카오 주변 주차장 조회
+        //논블로킹
+        Mono<List<EnrichedParking>> kakaoMono =
+                kakaoWebClient.get()
+                        .uri(uri -> uri
+                                .path("/v2/local/search/category.json")
+                                .queryParam("category_group_code", "PK6")
+                                .queryParam("x", lon)        // 경도
+                                .queryParam("y", lat)        // 위도
+                                .queryParam("radius", radiusMeters)
+                                .queryParam("page", page)    // 1~45
+                                .queryParam("size", size)    // 1~15
+                                .queryParam("sort", sort)    // distance 권장
+                                .build())
+                        .retrieve()
+                        .bodyToMono(KakaoSearchResponse.class)
+                        // 3) CSV 요금 매칭 + 스코어 계산용 확장 모델로 변환
+                        .map(resp -> resp.documents().stream().map(doc -> {
+                            Double dx = parseDouble(doc.x());
+                            Double dy = parseDouble(doc.y());
+                            Integer dist = parseInt(doc.distance());
 
-                                    return new EnrichedParking(
-                                            doc.id(),
-                                            safe(doc.placeName()),
-                                            safe(doc.addressName()),
-                                            dx, dy,
-                                            safe(doc.placeUrl()),
-                                            rate.orElse(null),
-                                            dist
-                                    );
-                                }).collect(Collectors.toList()))
-                                // 4) 점수 계산 → 정렬 → 최종 DTO 매핑
-                                .map(list -> {
-                                    final String bnNorm = normalize(buildingName);
-                                    list.forEach(p -> p.score = scoreParking(p, bnNorm));
-                                    return list.stream()
-                                            .sorted(Comparator
-                                                    .comparingDouble((EnrichedParking p) -> -p.score) // 점수 내림차순
-                                                    .thenComparing(p -> Optional.ofNullable(p.distance).orElse(Integer.MAX_VALUE)) // 동일 점수면 가까운 순
-                                            )
-                                            .map(p -> new ParkingWithRate(
-                                                    p.id, p.placeName, p.addressName,
-                                                    p.x, p.y, p.placeUrl,
-                                                    p.rateInfo == null ? null : p.rateInfo.getTimerate(),
-                                                    p.rateInfo == null ? null : p.rateInfo.getAddrate(),
-                                                    p.distance
-                                            ))
-                                            .collect(Collectors.toList());
-                                })
-                );
+                            // CSV에서 요금 매칭 (이름 정규화 + 좌표 가까운 지점 우선)
+                            Optional<RateInfo> rate = rateIndex.findBest(doc.placeName(), dy, dx);
+
+                            return new EnrichedParking(
+                                    "kakao:"+doc.id(),
+                                    safe(doc.placeName()),
+                                    safe(doc.addressName()),
+                                    dx, dy,
+                                    safe(doc.placeUrl()),
+                                    rate.orElse(null),
+                                    dist,
+                                    0
+                            );
+                        }).collect(Collectors.toList()))
+                        .onErrorReturn(List.of()); // 외부 API 실패시 빈 리스트
+
+
+        //3) 우리 DB 개인 주차장 (operate=true + 반경 + 운영시간 포함)
+        Mono<List<EnrichedParking>> privateMono = Mono.fromCallable(() -> {
+                    //radiusMeters내에 있는 개인 주차장 반환
+                    double[] box = bbox(lat, lon, radiusMeters);
+                    List<Parking> rows = parkingRepository.findOperateInBoxWithTimes(
+                            box[0], box[1], box[2], box[3]);
+
+                    LocalTime now = LocalTime.now(java.time.ZoneId.of("Asia/Seoul"));
+
+                    List<EnrichedParking> list = new ArrayList<>();
+                    for (Parking p : rows) {
+                        //현재 위치와 개인 주차장 까지의 곡면 거리
+                        double d = haversineMeters(lat, lon, p.getPLat(), p.getPLng());
+                        if (d > radiusMeters) continue;
+
+                        OperateTimeCheck op = checkOperateTimeNow(p.getParkingTimes(), now);
+                        //현재 운영중인지
+                        if (!op.isOperateCheck()) continue;
+                        //남은 시간이 10분 미만인지
+                        if(!op.isLastStartCheck()) continue;
+
+                        //개인 주차장 요금
+                        RateInfo rate = new RateInfo(
+                                p.getName(),
+                                10,
+                                p.getCharge(),
+                                p.getPLat(),
+                                p.getPLng());
+
+                        EnrichedParking e = new EnrichedParking(
+                                "db:" + p.getId(),
+                                safe(p.getName()),
+                                safe(p.getAddress()),
+                                p.getPLng(), //x
+                                p.getPLat(), //y
+                                null,  //placeUrl 없음
+                                rate,
+                                (int) Math.round(d),
+                                op.getRemainTime()
+                        );
+                        list.add(e);
+                    }
+                    return list;
+                })
+                //블로킹
+                .subscribeOn(Schedulers.boundedElastic())
+                .onErrorReturn(List.of());
+
+        // 4) 점수 계산 → 정렬 → 최종 DTO 매핑
+        return Mono.zip(
+                        buildingNameMono,
+                        kakaoMono.defaultIfEmpty(List.of()),
+                        privateMono.defaultIfEmpty(List.of())
+                )
+                .map(list -> {
+                    String buildingName = normalize(list.getT1()); //목적지명
+                    List<EnrichedParking> merged = Stream
+                            .concat(list.getT2().stream(),  //카카오 리스트
+                                    list.getT3().stream())  //개인 주차장 리스트
+                            .toList();
+
+                    // 스코어 계산(+개인 주차장 가산)
+                    for (EnrichedParking p : merged) {
+                        p.score = scoreParking(p, buildingName);
+                        if (p.id.startsWith("db:")) {
+                            p.score += 1.5; //개인 주차장 약한 가산
+                            if (p.limitMinutes != null) {
+                                p.score += Math.min(p.limitMinutes, 60) / 60.0; //남은운영시간당(최대 +1.0)
+                            }
+                        }
+                    }
+
+
+                    return merged.stream()
+                            .sorted(Comparator
+                                            .comparingDouble((EnrichedParking p) -> -p.score) // 점수 내림차순
+                                            .thenComparing(p -> Optional.ofNullable(p.distance).orElse(Integer.MAX_VALUE)) // 동일 점수면 가까운 순
+                            )
+                            .limit(size)
+                            .map(p -> new ParkingWithRate(
+                                    p.id, p.placeName, p.addressName,
+                                    p.x, p.y, p.placeUrl,
+                                    p.rateInfo == null ? null : p.rateInfo.getTimerate(),
+                                    p.rateInfo == null ? null : p.rateInfo.getAddrate(),
+                                    p.distance
+                            ))
+                            .collect(Collectors.toList());
+                });
+
     }
 
     // -------------------- Scoring -------------------- //
@@ -199,6 +283,48 @@ public class ParkingSearchService {
         return cnt;
     }
 
+    //입력한 위도, 경도 중심으로 반경 radiusMeters만큼의 사각형 바운딩 박스의 경계값
+    private static double[] bbox(double lat, double lon, int radiusMeters) {
+        double dLat = radiusMeters / 111_000.0; //1위도 = 11000m
+        double dLng = radiusMeters / (111_000.0 * Math.cos(Math.toRadians(lat)));
+        return new double[]{lat - dLat, lat + dLat, lon - dLng, lon + dLng};
+    }
+
+    //두 위·경도(현재 위치, 개인 주차장 위치) 좌표 사이의 실제 지표 거리(대권거리), 하버사인 공식으로 거리를 게산
+    private static double haversineMeters(double lat1, double lon1, double lat2, double lon2) {
+        final double R = 6371000.0; //지구 평균 반지름
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        //하버사인 공식
+        double a = Math.sin(dLat/2) * Math.sin(dLat/2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon/2) * Math.sin(dLon/2);
+
+        //두 점사이의 곡선 거리(미터)
+        return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    //운영시간 체크, 종료시간 10분전 체크
+    private static OperateTimeCheck checkOperateTimeNow(List<ParkingTime> times, LocalTime now) {
+        if (times == null || times.isEmpty())
+            return new OperateTimeCheck(false, false, 0);
+
+        for (ParkingTime t : times) {
+            LocalTime start = t.getStart();
+            LocalTime end   = t.getEnd();
+
+            if (now.isAfter(start) && now.isBefore(end)) {
+                LocalTime lastStartTime = end.minusMinutes(10);
+                boolean check = now.isBefore(lastStartTime); //마지막 예약 가능 시간 전이면 -> true
+                int remainTime = (int) ChronoUnit.MINUTES.between(now, end)+1;
+
+                return new OperateTimeCheck(true, check, Math.max(remainTime, 0));
+            }
+        }
+        return new OperateTimeCheck(false, false, 0);
+    }
+
+
     // 점수 저장을 위한 내부 모델 (새 파일 생성 X)
     private static class EnrichedParking {
         final String id;
@@ -209,9 +335,10 @@ public class ParkingSearchService {
         final RateInfo rateInfo;
         final Integer distance;
         double score;
+        Integer limitMinutes;
 
         EnrichedParking(String id, String placeName, String addressName,
-                        Double x, Double y, String placeUrl, RateInfo rateInfo, Integer distance) {
+                        Double x, Double y, String placeUrl, RateInfo rateInfo, Integer distance, Integer limitMinutes) {
             this.id = id;
             this.placeName = placeName;
             this.addressName = addressName;
@@ -219,6 +346,7 @@ public class ParkingSearchService {
             this.placeUrl = placeUrl;
             this.rateInfo = rateInfo;
             this.distance = distance;
+            this.limitMinutes = limitMinutes;
         }
     }
 

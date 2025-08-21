@@ -52,6 +52,7 @@ public class Parking extends BaseEntity{
     @Column(name = "content")
     private String content;
 
+    //현재운영이 아닌 주차장 장소 활성화 비활성화
     @Column(name="operate", nullable = false)
     private boolean operate;
 
