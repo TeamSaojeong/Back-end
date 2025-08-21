@@ -29,7 +29,8 @@ public class SoonOut extends BaseEntity {
 
     @Column(name="address")
     private String address;
-    // 곧나감 남김(활성) 여부
+
+    // 곧나감 남김(활성) 여부 (버튼 누름 여부)
     @Column(name = "status", nullable = false)
     private Boolean status;
 

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class SoonOutApiController {
 
-    private final AlertService alertService;
+    private final SoonOutService soonOutService;
     private final ParkingRepository parkingRepo;
     private final ReservationRepository reservationRepo;
 
@@ -29,7 +29,7 @@ public class SoonOutApiController {
         Parking parking = (req.getParkingId() != null) ? parkingRepo.findById(req.getParkingId()).orElse(null) : null;
         Reservation res = (req.getReservationId()!= null) ? reservationRepo.findById(req.getReservationId()).orElse(null) : null;
 
-        Long id = alertService.createSoonOut(req.getLat(), req.getLat(), req.getMinute(), req.isStatus(),
+        Long id = soonOutService.createSoonOut(req.getLat(), req.getLng(), req.getMinute(), req.isStatus(),
                 parking, req.getProvider(), req.getExternalId(),
                 res, req.getPlaceName(), req.getAddress());
         return ResponseEntity.ok(CustomApiResponse.createSuccess(HttpStatus.OK.value(),

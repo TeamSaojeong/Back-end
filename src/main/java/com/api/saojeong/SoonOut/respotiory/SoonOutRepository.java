@@ -29,4 +29,5 @@ public interface SoonOutRepository extends JpaRepository<SoonOut,Long> {
           AND TIMESTAMPADD(MINUTE, minute, created_at) <= :now
         """, nativeQuery = true)
     int deleteExpiredNow(@Param("now") LocalDateTime now);
+
 }
