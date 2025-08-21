@@ -46,6 +46,10 @@ dependencies {
 	//AWS, S3
 	implementation platform ('io.awspring.cloud:spring-cloud-aws-dependencies:3.4.0')
 	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+	//shedlock
+	implementation 'net.javacrumbs.shedlock:shedlock-spring:5.11.0'
+	implementation 'net.javacrumbs.shedlock:shedlock-provider-jdbc-template:5.11.0'
+
 
 
 }

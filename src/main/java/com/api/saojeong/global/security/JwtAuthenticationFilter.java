@@ -11,7 +11,11 @@ import com.api.saojeong.Member.enums.Authority;
 import com.api.saojeong.Member.repository.MemberRepository;
 import com.api.saojeong.Member.service.MemberQueryService;
 import com.api.saojeong.domain.Member;
+
+import com.api.saojeong.global.handler.RestAuthenticationEntryPoint;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -34,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final MemberRepository memberRepository;
     private final MemberQueryService memberQueryService;
-
+    private final RestAuthenticationEntryPoint authenticationEntryPoint;
     /**
      * 로그인 요청 시 JWT 검증 X
      */
@@ -49,23 +53,68 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      * 	요청에 Refresh Token 존재 -> Refresh Token 검증 후 Access Token, Refresh Token 생성
      * 	요청에 Refresh Token 존재 X -> Access Token 검증
      */
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+//                                    FilterChain filterChain) throws ServletException, IOException {
+//        String refreshToken = jwtService.extractRefreshToken(request)
+//                .filter(jwtService::isTokenValid)
+//                .orElse(null);
+//
+//        if (refreshToken != null) {
+//            checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
+//            return;
+//        }
+//
+//        if (refreshToken == null) {
+//            checkAccessTokenAndAuthentication(request, response, filterChain);
+//        }
+//    }
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-        String refreshToken = jwtService.extractRefreshToken(request)
-                .filter(jwtService::isTokenValid)
-                .orElse(null);
+    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+            throws ServletException, IOException {
 
-        if (refreshToken != null) {
-            checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
-            return;
-        }
+        try {
+            // 1) Refresh Token
+            var refreshOpt = jwtService.extractRefreshToken(req);
+            if (refreshOpt.isPresent()) {
+                String refresh = refreshOpt.get();
+                if (jwtService.isTokenValid(refresh)) {
+                    checkRefreshTokenAndReIssueAccessToken(res, refresh);
+                    return; // 재발급 후 종료
+                } else {
+                    // ★ 여기서 예외 던지지 말고 EntryPoint 호출
+                    authenticationEntryPoint.commence(
+                            req, res, new InsufficientAuthenticationException("Invalid refresh token"));
+                    return;
+                }
+            }
 
-        if (refreshToken == null) {
-            checkAccessTokenAndAuthentication(request, response, filterChain);
+            // 2) Access Token
+            var accessOpt = jwtService.extractAccessToken(req);
+            if (accessOpt.isPresent()) {
+                String access = accessOpt.get();
+                if (jwtService.isTokenValid(access)) {
+                    jwtService.extractLoginId(access)
+                            .flatMap(memberQueryService::getMemberWithAuthorities)
+                            .ifPresent(this::saveAuthentication);
+                    chain.doFilter(req, res);
+                    return;
+                } else {
+                    authenticationEntryPoint.commence(
+                            req, res, new InsufficientAuthenticationException("Invalid access token"));
+                    return;
+                }
+            }
+
+            // 3) 토큰 없음 → 퍼밋 경로면 통과, 보호 경로면 뒤에서 401 나가게(여기서는 일단 통과)
+            chain.doFilter(req, res);
+
+        } catch (Exception e) {
+            // 혹시 모를 예외도 401로 표준화
+            authenticationEntryPoint.commence(
+                    req, res, new InsufficientAuthenticationException("Authentication failed", e));
         }
     }
-
     /**
      * Refresh Token이 유효한 지 검증 후 Access Token 재발급
      */
