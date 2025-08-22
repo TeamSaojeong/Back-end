@@ -36,19 +36,34 @@ public class ReservationController {
     }
 
     //개인 예약 시간 추가
-    @PostMapping("/parking/{parkingId}/personal-reservation")
-    public ResponseEntity<CustomApiResponse<?>> createReservation(@LoginMember Member member,
-                                                                  @PathVariable Long parkingId,
-                                                                  @RequestBody CreateReservationRequestDto req){
+//    @PostMapping("/parking/{parkingId}/personal-reservation")
+//    public ResponseEntity<CustomApiResponse<?>> createReservation(@LoginMember Member member,
+//                                                                  @PathVariable Long parkingId,
+//                                                                  @RequestBody CreateReservationRequestDto req){
+//
+//        CreateReservationResponseDto res = reservationService.createReservation(member, parkingId, req);
+//
+//        return ResponseEntity
+//                .status(HttpStatus.CREATED)
+//                .body(CustomApiResponse.createSuccess(
+//                        HttpStatus.CREATED.value(),
+//                        res,
+//                        "예약 성공"
+//                ));
+//    }
 
-        CreateReservationResponseDto res = reservationService.createReservation(member, parkingId, req);
+    //예약한거 상세 조회
+    @GetMapping("/parking/personal")
+    public ResponseEntity<CustomApiResponse<?>> getDetailReservation(@LoginMember Member member,
+                                                               @RequestParam long reservationId){
+        CreateReservationResponseDto res = reservationService.getDetailReservation(member, reservationId);
 
         return ResponseEntity
-                .status(HttpStatus.CREATED)
+                .status(HttpStatus.OK)
                 .body(CustomApiResponse.createSuccess(
-                        HttpStatus.CREATED.value(),
+                        HttpStatus.OK.value(),
                         res,
-                        "예약 성공"
+                        "조회 성공"
                 ));
     }
 
