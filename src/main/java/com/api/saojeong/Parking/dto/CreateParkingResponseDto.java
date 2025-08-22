@@ -11,8 +11,8 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateParkingResponseDto {
     //Long member_id;
-    private Long parking_id;
-    private String name;
+    private Long parkingId;
+    private String parkingName;
     private List<ParkingTimeDto> operateTimes;
     private int charge;
 
