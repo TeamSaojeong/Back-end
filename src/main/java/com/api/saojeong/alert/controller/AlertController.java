@@ -29,6 +29,7 @@ public class AlertController {
     private final ParkingRepository parkingRepo;
     private final MemberRepository memberRepo;
 
+    //구독
     @PostMapping
     public ResponseEntity<?> subscribe(@LoginMember Member memberId,
                                        @RequestParam(required = false) Long parkingId,
@@ -56,5 +57,13 @@ public class AlertController {
         Long id = alertService.subscribe(m, p, provider, externalId, minMinutes, expiresAt, active);
         return ResponseEntity.ok(CustomApiResponse.createSuccess(HttpStatus.OK.value(),
                 java.util.Map.of("id", id), "알림 구독 처리 완료"));
+    }
+
+    //구독 취소
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> unsubscribe(@LoginMember Member memberId,
+                                         @RequestParam Long alertId) {
+
+        return null;
     }
 }
