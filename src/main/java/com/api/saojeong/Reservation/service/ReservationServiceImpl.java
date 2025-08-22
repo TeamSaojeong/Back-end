@@ -80,66 +80,62 @@ public class ReservationServiceImpl implements ReservationService {
         return new GetReservationResponseDto(buttonStatus, soonOutTime, remainTime);
     }
 
+
+
     //개인 예약 추가
     @Override
-    public CreateReservationResponseDto createReservation(Member member, Long parkingId, CreateReservationRequestDto req) {
+    public CreateReservationResponseDto createReservation(Pay pay) {
+
         //주차장 존재 확인
-        Parking parking = parkingRepository.findById(parkingId)
+        Parking parking = parkingRepository.findByIdAndOperate(pay.getParking().getId(), true)
                 .orElseThrow(ParkingNotFoundException::new);
 
-        //운영시간이 아니거나 마지막 예약 가능 시간을 넘었는지 체크
-        OperateTimeCheck check = checkOperateTime(parkingId);
-        if(!check.isOperateCheck()) {
-            throw new NoOperateTime();
-        }
-        if(!check.isLastStartCheck()) {
-            throw new TimePassLastReservationTime();
-        }
+        //=> 결제 하기전에 확인 하는 것으로 수정
+//        //운영시간이 아니거나 마지막 예약 가능 시간을 넘었는지 체크
+//        OperateTimeCheck check = checkOperateTime(parking.getId());
+//        if(!check.isOperateCheck()) {
+//            throw new NoOperateTime();
+//        }
+//        if(!check.isLastStartCheck()) {
+//            throw new TimePassLastReservationTime();
+//        }
 
         LocalDateTime now = LocalDateTime.now();
-        Reservation rev;
-
-
-        //나중에 결제 api를 만들면 개인 주차장은 결제하기로 결제 후 에약 추가 진행
-        //결제를 한 순간이 예약 시간 시작 기준으로 하고 싶은데
-        //이러면 예외처리를 하는 순간을 언제로 해야하나..
-        //그냥 예약 데이터를 저장하고 결제?
 
         //개인
-            //예약이 있는지 확인
-            //2개가 있을 수 없는 구조 (-> 버튼에서 확인 후 넘어옴)
-            Optional<Reservation> reservation = reservationRepository.findFirstByParkingIdAndStatus(parkingId,true);
+        //예약이 있는지 확인
+        //2개가 있을 수 없는 구조 (-> 버튼에서 확인 후 넘어옴)
+        Optional<Reservation> reservation = reservationRepository.findFirstByParkingIdAndStatus(parking.getId(),true);
+        //각 상태에 따라
+        //예약이 없으면 바로 생성
+        LocalDateTime startTime = now;
 
-            //각 상태에 따라
-            //예약이 없으면 바로 생성
-            LocalDateTime startTime = now;
+        //선 예약 : 곧 나감을 눌렀고
+        if (reservation.isPresent()) {
 
-            //선 예약 : 곧 나감을 눌렀고
-            if (reservation.isPresent()) {
+            //곧 나감 활성화&존재 확인
+            SoonOut soonOut = soonOutRepository.findByParkingIdAndStatus(parking.getId(), true )
+                    .orElseThrow(SoonOutNotFound::new);
 
-                //곧 나감 활성화&존재 확인
-                SoonOut soonOut = soonOutRepository.findByParkingIdAndStatus(parkingId, true )
-                        .orElseThrow(SoonOutNotFound::new);
-
-                //10~6분 남았을때 : 예약하는 시간 +10분 뒤부터 시작
-                if(soonOut.getMinute() == 10){
-                    startTime = now.plusMinutes(10);
-                }
-                //5~1분 남았을때 : 예약하는 시간 +5분 뒤부터 시작
-                else if(soonOut.getMinute() == 5){
-                    startTime = now.plusMinutes(5);
-                }
-
+            //10~6분 남았을때 : 예약하는 시간 +10분 뒤부터 시작
+            if(soonOut.getMinute() == 10){
+                startTime = now.plusMinutes(10);
+            }
+            //5~1분 남았을때 : 예약하는 시간 +5분 뒤부터 시작
+            else if(soonOut.getMinute() == 5){
+                startTime = now.plusMinutes(5);
             }
 
-            //생성
-            rev = Reservation.builder()
-                    .member(member)
-                    .parking(parking)
-                    .userStart(startTime)
-                    .userEnd(startTime.plusMinutes(req.getUsingMinutes()))
-                    .status(true)
-                    .build();
+        }
+        //생성
+        Reservation rev = Reservation.builder()
+                .member(pay.getMember())
+                .parking(parking)
+                .userStart(startTime)
+                .userEnd(startTime.plusMinutes(pay.getUsingMinutes()))
+                .status(true)
+                .pay(pay)
+                .build();
 
 
         Reservation res = reservationRepository.save(rev);
@@ -150,8 +146,10 @@ public class ReservationServiceImpl implements ReservationService {
                 res.getParking().getName(),
                 res.getUserStart().toLocalTime(),
                 res.getUserEnd().toLocalTime(),
-                req.getUsingMinutes());
+                pay.getUsingMinutes());
     }
+
+
 
     //공영, 민영 예약 추가
     @Override
@@ -180,6 +178,28 @@ public class ReservationServiceImpl implements ReservationService {
                 res.getUserEnd().toLocalTime(),
                 req.getUsingMinutes());
     }
+
+
+
+    //개인 결제 내용 조회
+    @Override
+    public CreateReservationResponseDto getDetailReservation(Member member, long reservationId) {
+
+        Reservation res = reservationRepository.findByIdAndStatus(reservationId, true)
+                .orElseThrow(ReservationNotFound::new);
+
+
+
+        return new CreateReservationResponseDto(
+                res.getId(),
+                res.getMember().getId(),
+                res.getParking().getName(),
+                res.getUserStart().toLocalTime(),
+                res.getUserEnd().toLocalTime(),
+                res.getPay().getUsingMinutes());
+    }
+
+
 
     //예약 연장
     @Transactional
@@ -241,7 +261,7 @@ public class ReservationServiceImpl implements ReservationService {
 
 
     //운영시간 체크 & 마지막 에약 시작 가능 시각을 넘겼을때 (10분단위)
-    private OperateTimeCheck checkOperateTime(Long parkingId) {
+    public OperateTimeCheck checkOperateTime(Long parkingId) {
         LocalTime now = LocalTime.now();
 
         //운영시간

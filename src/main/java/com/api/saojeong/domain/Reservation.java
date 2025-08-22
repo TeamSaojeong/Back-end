@@ -43,4 +43,8 @@ public class Reservation extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="pay_id", nullable=false)
+    private Pay pay;
+
 }
