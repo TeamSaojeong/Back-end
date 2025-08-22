@@ -8,7 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AlertErrorCode implements BaseResponseCode {
 
-    ALERT_NOT_FOUND("ALERT_NOT_FOUND",404,"메시지를 찾을 수 없습니다.");
+    ALERT_NOT_FOUND("ALERT_NOT_FOUND",404,"알림을 찾을 수 없습니다.");
 
     private final String code;
     private final int status;
