@@ -100,7 +100,9 @@ public class MemberParkingServiceImpl implements MemberParkingService {
             res.add(new  GetMemberParkingResponseDto(
                     p.getId(),
                     p.getName(),
-                    p.isOperate()
+                    p.isOperate(),
+                    p.getPLat(),
+                    p.getPLng()
             ));
         }
 
