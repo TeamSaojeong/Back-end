@@ -9,6 +9,4 @@ public class OrderRequestDto {
     private int total;
     private int usingMinutes;
 
-    public OrderRequestDto(String 개인, long l, int i, int i1) {
-    }
 }
