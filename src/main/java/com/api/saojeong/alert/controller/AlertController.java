@@ -63,7 +63,13 @@ public class AlertController {
     @DeleteMapping("/delete")
     public ResponseEntity<?> unsubscribe(@LoginMember Member memberId,
                                          @RequestParam Long alertId) {
-
-        return null;
+        alertService.deleteSubscribe(alertId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(CustomApiResponse.createSuccess(
+                        HttpStatus.OK.value(),
+                        null,
+                        "구독 취소 완료"
+                ));
     }
 }

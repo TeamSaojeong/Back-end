@@ -2,6 +2,7 @@ package com.api.saojeong.alert.service;
 
 import com.api.saojeong.SoonOut.respotiory.SoonOutRepository;
 import com.api.saojeong.alert.Enum.NotificationType;
+import com.api.saojeong.alert.exception.AlertNotFoundException;
 import com.api.saojeong.alert.repository.AlertSubscriptionRepository;
 import com.api.saojeong.alert.repository.NotificationEventRepository;
 import com.api.saojeong.domain.*;
@@ -49,4 +50,10 @@ public class AlertService {
     }
 
 
+    public void deleteSubscribe(Long alertId) {
+        AlertSubscription alert = subRepo.findByIdAndActive(alertId, true)
+                .orElseThrow(AlertNotFoundException::new);
+
+        subRepo.delete(alert);
+    }
 }
