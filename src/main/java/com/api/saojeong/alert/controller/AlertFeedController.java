@@ -2,6 +2,7 @@ package com.api.saojeong.alert.controller;
 
 import com.api.saojeong.alert.repository.UserAlertRepository;
 import com.api.saojeong.domain.Member;
+import com.api.saojeong.global.security.LoginMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class AlertFeedController {
     private final UserAlertRepository repo;
 
     @GetMapping("/feed")
-    public List<AlertItemDto> feed(@AuthenticationPrincipal Member me,
+    public List<AlertItemDto> feed(@LoginMember Member me,
                                    @RequestParam(required = false) OffsetDateTime since) {
         return repo.findNewAlerts(me.getId(), since).stream()
                 .map(ua -> new AlertItemDto(
