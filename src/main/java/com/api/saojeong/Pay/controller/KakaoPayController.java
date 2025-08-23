@@ -43,7 +43,7 @@ public class KakaoPayController {
                 );
     }
 
-    @PostMapping("/approve")
+    @GetMapping("/approve")
     public ResponseEntity<Void> approve(@RequestParam("pg_token") String pgToken,
                                                         @RequestParam("orderNum") String orderNum) {
 
