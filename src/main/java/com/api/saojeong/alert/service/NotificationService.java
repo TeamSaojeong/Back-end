@@ -18,6 +18,7 @@ public class NotificationService {
 
     private final JavaMailSender mailSender;
 
+
     @Value("${app.mail.from:no-reply@saojeong.com}")
     private String from;
 
@@ -34,6 +35,7 @@ public class NotificationService {
             h.setText(String.format("%s에서 %d분 내로 자리가 날 예정입니다.\n주소: %s",
                     placeName, minute, address));
             mailSender.send(msg);
+
         } catch (Exception e) {
             log.error("Failed to send email to {}: {}", to, e.getMessage());
         }
