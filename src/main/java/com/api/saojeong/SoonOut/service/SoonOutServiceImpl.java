@@ -162,6 +162,7 @@ public class SoonOutServiceImpl implements SoonOutService {
                         .payloadJson(objectMapper.writeValueAsString(payload))
                         .createdAt(now)
                         .build());
+                userAlertRepository.flush();
             } catch (Exception ex) {
                 log.warn("[SOONOUT_ALERT_FEED] persist failed memId={}, soId={}, err={}", memId, so.getId(), ex.toString());
                 // 저장 실패여도 이메일은 계속 진행
