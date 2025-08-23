@@ -138,28 +138,12 @@ public class SoonOutServiceImpl implements SoonOutService {
 
             // 👉👉👉 ▶ INSERT HERE — 프론트용 개인 알림 적재
             try {
-                String deeplink = "/parking/detail?soId=" + so.getId() + "&sid=" + s.getId();
-                int distMeters = (int) Math.round(
-                        haversineMeters(lat, lng, locs.get(memId).getLat(), locs.get(memId).getLng())
-                );
-
-                // 필요시 tier/언어 등 개인화 요소 추가 가능
-                var payload = Map.of(
-                        "minute", minute,
-                        "distance", distMeters,
-                        "provider", provider,
-                        "externalId", externalId,
-                        "address", address
-                );
-
                 userAlertRepository.save(UserAlert.builder()
                         .member(s.getMember())
                         .type("SOONOUT")
                         .soonoutId(so.getId())
                         .title("🚗 곧 비어요 (" + minute + "분)")
-                        .body((placeName != null ? placeName : "주차장") + " · 약 " + distMeters + "m")
-                        .deeplink(deeplink)
-                        .payloadJson(objectMapper.writeValueAsString(payload))
+                        .body((placeName != null ? placeName : "주차장"))
                         .createdAt(now)
                         .build());
                 userAlertRepository.flush();
