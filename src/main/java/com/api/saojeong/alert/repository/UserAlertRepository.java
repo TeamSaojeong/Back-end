@@ -19,5 +19,5 @@ public interface UserAlertRepository extends JpaRepository<UserAlert, Long> {
 
     @Modifying
     @Query("UPDATE UserAlert ua SET ua.consumedAt = :ts WHERE ua.id IN :ids AND ua.member.id = :memberId")
-    int consumeAlerts(Long memberId, List<Long> ids, OffsetDateTime ts);
+    void consumeAlerts(Long memberId, List<Long> ids, OffsetDateTime ts);
 }

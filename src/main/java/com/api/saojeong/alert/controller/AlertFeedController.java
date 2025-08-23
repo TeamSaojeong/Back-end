@@ -31,7 +31,7 @@ public class AlertFeedController {
     }
 
     @PostMapping("/consume")
-    public void consume(@LoginMember Member me, @RequestBody Ids req) {
+    public void consume(@AuthenticationPrincipal Member me, @RequestBody Ids req) {
         repo.consumeAlerts(me.getId(), req.ids(), OffsetDateTime.now());
     }
 
