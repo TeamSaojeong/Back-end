@@ -1,13 +1,10 @@
 package com.api.saojeong.SoonOut.service;
 
-import com.api.saojeong.Reservation.exception.ReservationNotFound;
-import com.api.saojeong.Reservation.repository.ReservationRepository;
-import com.api.saojeong.SoonOut.dto.CreateSoonOutRequestDto;
-import com.api.saojeong.SoonOut.dto.CreateSoonOutResponseDto;
-import com.api.saojeong.SoonOut.dto.CancelSoonOutResponseDto;
-import com.api.saojeong.SoonOut.exception.SoonOutNotFound;
+import com.api.saojeong.SoonOut.dto.DetailSoonOutEventDto;
+import com.api.saojeong.SoonOut.exception.SoonOutNotFoundException;
 import com.api.saojeong.SoonOut.respotiory.SoonOutRepository;
 import com.api.saojeong.alert.Enum.NotificationType;
+import com.api.saojeong.alert.exception.EventNotFoundException;
 import com.api.saojeong.alert.repository.AlertSubscriptionRepository;
 import com.api.saojeong.alert.repository.NotificationEventRepository;
 import com.api.saojeong.alert.service.NotificationService;
@@ -230,6 +227,30 @@ public class SoonOutServiceImpl implements SoonOutService {
                 + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
                 * Math.sin(dLon/2) * Math.sin(dLon/2);
         return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    //생성된 곧나감 알림 조회
+    @Override
+    public DetailSoonOutEventDto getSoonOutDetail(Member member, Long soonOutId) {
+        //곧나감 확인
+        SoonOut soonOut = soonRepo.findByIdAndStatus(soonOutId, true)
+                .orElseThrow(SoonOutNotFoundException::new);
+
+        //알림이벤트 확인
+        NotificationEvent event = eventRepo.findBySoonOutIdAndTypeAndMember(soonOutId, NotificationType.SOONOUT, member)
+                .orElseThrow(EventNotFoundException::new);
+
+
+        return DetailSoonOutEventDto.builder()
+                .soonOutId(soonOutId)
+                .notificationType(event.getType())
+                .minutes(soonOut.getMinute())
+                .parkingName(soonOut.getPlaceName())
+                .parkingId(soonOut.getParking() != null ? soonOut.getParking().getId() : null)
+                .provider(soonOut.getProvider() != null ? soonOut.getProvider() : null)
+                .externalId(soonOut.getExternalId() != null ? soonOut.getExternalId() : null)
+                .createdAt(soonOut.getCreatedAt())
+                .build();
     }
 
     //곧 알림 추가

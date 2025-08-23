@@ -30,4 +30,5 @@ public interface SoonOutRepository extends JpaRepository<SoonOut,Long> {
         """, nativeQuery = true)
     int deleteExpiredNow(@Param("now") LocalDateTime now);
 
+    Optional<SoonOut> findByIdAndStatus(Long soonOutId, boolean b);
 }

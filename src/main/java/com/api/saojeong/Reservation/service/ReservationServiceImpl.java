@@ -5,11 +5,9 @@ import com.api.saojeong.Parking.repository.ParkingRepository;
 import com.api.saojeong.Parking.repository.ParkingTimeRepository;
 import com.api.saojeong.Reservation.dto.*;
 import com.api.saojeong.Reservation.enums.ButtonStatus;
-import com.api.saojeong.Reservation.exception.NoOperateTime;
 import com.api.saojeong.Reservation.exception.ReservationNotFound;
-import com.api.saojeong.Reservation.exception.TimePassLastReservationTime;
 import com.api.saojeong.Reservation.repository.ReservationRepository;
-import com.api.saojeong.SoonOut.exception.SoonOutNotFound;
+import com.api.saojeong.SoonOut.exception.SoonOutNotFoundException;
 import com.api.saojeong.SoonOut.respotiory.SoonOutRepository;
 import com.api.saojeong.domain.*;
 import lombok.RequiredArgsConstructor;
@@ -115,7 +113,7 @@ public class ReservationServiceImpl implements ReservationService {
 
             //곧 나감 활성화&존재 확인
             SoonOut soonOut = soonOutRepository.findByParkingIdAndStatus(parking.getId(), true )
-                    .orElseThrow(SoonOutNotFound::new);
+                    .orElseThrow(SoonOutNotFoundException::new);
 
             //10~6분 남았을때 : 예약하는 시간 +10분 뒤부터 시작
             if(soonOut.getMinute() == 10){
