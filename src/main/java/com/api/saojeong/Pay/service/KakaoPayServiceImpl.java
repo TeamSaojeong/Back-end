@@ -81,9 +81,9 @@ public class KakaoPayServiceImpl implements KakaoPayService {
 
         String base = "https://api.parkhere.store/api/pay";
         //String base = "http://localhost:8080/api/pay";
-        params.put("approval_url", base + "/approve?orderId=" + orderNum);
-        params.put("cancel_url",   base + "/cancel?orderId=" + orderNum);
-        params.put("fail_url",     base + "/fail?orderId=" + orderNum);
+        params.put("approval_url", base + "/approve?orderNum=" + orderNum);
+        params.put("cancel_url",   base + "/cancel?orderNum=" + orderNum);
+        params.put("fail_url",     base + "/fail?orderNum=" + orderNum);
 
         HttpEntity<Map<String,Object>> entity = new HttpEntity<>(params, headers);
 
