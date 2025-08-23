@@ -24,6 +24,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -91,34 +92,39 @@ public class KakaoPayServiceImpl implements KakaoPayService {
         HttpEntity<Map<String,Object>> entity = new HttpEntity<>(params, headers);
 
         RestTemplate rt = new RestTemplate();
-        KakaoReadyResponseDto res = rt.postForObject(
-                "https://open-api.kakaopay.com/online/v1/payment/ready",
-                entity,
-                KakaoReadyResponseDto.class
-        );
+        try{
+            KakaoReadyResponseDto res = rt.postForObject(
+                    "https://open-api.kakaopay.com/online/v1/payment/ready",
+                    entity,
+                    KakaoReadyResponseDto.class
+            );
 
-        log.info("[KAKAO READY] 요청 완료 - tid={}, redirectUrl={}", res.getTid(), res.getNext_redirect_mobile_url());
+            log.info("[KAKAO READY] 요청 완료 - tid={}, redirectUrl={}", res.getTid(), res.getNext_redirect_mobile_url());
 
 
-        Pay pay = Pay.builder()
-                .orderNum(orderNum)
-                .member(member)
-                .parkingName(req.getParkName())
-                .quantity(1)
-                .total(req.getTotal())
-                .tid(res.getTid())
-                .status(PayStatus.READY)
-                .parking(parking)
-                .usingMinutes(req.getUsingMinutes())
-                .build();
+            Pay pay = Pay.builder()
+                    .orderNum(orderNum)
+                    .member(member)
+                    .parkingName(req.getParkName())
+                    .quantity(1)
+                    .total(req.getTotal())
+                    .tid(res.getTid())
+                    .status(PayStatus.READY)
+                    .parking(parking)
+                    .usingMinutes(req.getUsingMinutes())
+                    .build();
 
-        payRepository.save(pay);
+            payRepository.save(pay);
 
-        //성공 로그
-        log.info("[KAKAO READY] orderId={}, tid={}, nextPCRedirect={}, nextMobileRedirect={}",
-                orderNum, res.getTid(), res.getNext_redirect_pc_url(), res.getNext_redirect_mobile_url());
+            //성공 로그
+            log.info("[KAKAO READY] orderId={}, tid={}, nextPCRedirect={}, nextMobileRedirect={}",
+                    orderNum, res.getTid(), res.getNext_redirect_pc_url(), res.getNext_redirect_mobile_url());
 
-        return res;
+            return res;
+        }catch (RestClientException e) {
+            log.error("[KAKAO READY] 카카오 요청 중 오류 발생", e);
+            throw new RuntimeException("카카오페이 요청 실패", e);  // 필요시 커스텀 예외로
+        }
 
     }
 
