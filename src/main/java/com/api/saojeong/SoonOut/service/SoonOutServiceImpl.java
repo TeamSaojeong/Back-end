@@ -50,7 +50,7 @@ public class SoonOutServiceImpl implements SoonOutService {
     @Transactional
     public Long createSoonOut(Double lat, Double lng, int minute, boolean status,
                               Parking parking, String provider, String externalId, Reservation reservation,
-                              String placeNameOptional,String address) {
+                              String placeNameOptional,String address,Member member) {
 
         log.info("[SOONOUT][REQ] lat={}, lng={}, minute={}, status={}, parkingId={}, provider={}, externalId={}, reservationId={}, placeName={}",
                 lat, lng, minute, status,
@@ -139,7 +139,7 @@ public class SoonOutServiceImpl implements SoonOutService {
             // 👉👉👉 ▶ INSERT HERE — 프론트용 개인 알림 적재
             try {
                 userAlertRepository.save(UserAlert.builder()
-                        .member(s.getMember())
+                        .member(member)
                         .type("SOONOUT")
                         .soonoutId(so.getId())
                         .title("🚗 곧 비어요 (" + minute + "분)")
