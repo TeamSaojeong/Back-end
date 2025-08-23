@@ -29,8 +29,9 @@ public class KakaoPayController {
     @PostMapping("/ready")
     public ResponseEntity<CustomApiResponse<?>> payReady(@LoginMember Member member,
                                                          @RequestBody OrderRequestDto req) {
-
+        log.info("payReady() 진입. member = {}", member);
         KakaoReadyResponseDto res = kakaoPayService.payReady(member, req);
+        log.info("[KAKAO READY] payReady() 완료 - redirectUrl={}", res.getNext_redirect_mobile_url());
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -49,6 +50,7 @@ public class KakaoPayController {
         log.info("[카카오 결제 승인] orderNum={}, pg_token={}",orderNum, pgToken);
 
         CreateReservationResponseDto res = kakaoPayService.payApprove(orderNum, pgToken);
+        log.info("[KAKAO APPROVE] 예약 생성 완료 - reservationId={}", res.reservationId());
 
         //성공시 리다이렉트
         URI redirect = UriComponentsBuilder

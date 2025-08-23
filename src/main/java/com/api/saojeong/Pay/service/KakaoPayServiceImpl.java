@@ -47,12 +47,15 @@ public class KakaoPayServiceImpl implements KakaoPayService {
 
     public KakaoReadyResponseDto payReady(Member member, OrderRequestDto req) {
 
+        log.info("[KAKAO READY] 시작 - memberId={}, parkingId={}", member.getId(), req.getParkingId());
+
         //주차장이 있는지
         Parking parking = parkingRepository.findByIdAndOperate(req.getParkingId(), true)
                 .orElseThrow(ParkingNotFoundException::new);
 
         //운영시간이 아니거나 마지막 예약 가능 시간을 넘었는지 체크
         OperateTimeCheck check = reservationService.checkOperateTime(parking.getId());
+        log.info("[KAKAO READY] 운영 시간 체크 결과: {}", check);
         if(!check.isOperateCheck()) {
             throw new NoOperateTime();
         }
@@ -60,9 +63,9 @@ public class KakaoPayServiceImpl implements KakaoPayService {
             throw new TimePassLastReservationTime();
         }
 
+        log.info("[KAKAO READY] 카카오에 요청 준비 중");
 
         String orderNum = UUID.randomUUID().toString();
-
 
         //헤더
         HttpHeaders headers = new HttpHeaders();
@@ -94,6 +97,8 @@ public class KakaoPayServiceImpl implements KakaoPayService {
                 KakaoReadyResponseDto.class
         );
 
+        log.info("[KAKAO READY] 요청 완료 - tid={}, redirectUrl={}", res.getTid(), res.getNext_redirect_mobile_url());
+
 
         Pay pay = Pay.builder()
                 .orderNum(orderNum)
@@ -124,6 +129,8 @@ public class KakaoPayServiceImpl implements KakaoPayService {
         Pay pay = payRepository.findByOrderNumAndStatus(orderNum, PayStatus.READY)
                 .orElseThrow(OrderNumNotFound::new);
 
+        log.info("[KAKAO APPROVE] 결제 정보 확인 - memberId={}, tid={}", pay.getMember().getId(), pay.getTid());
+
         //카카오 승인 호출
         //헤더
         HttpHeaders headers = new HttpHeaders();
@@ -140,14 +147,21 @@ public class KakaoPayServiceImpl implements KakaoPayService {
         HttpEntity<Map<String,Object>> entity = new HttpEntity<>(params, headers);
 
         RestTemplate rt = new RestTemplate();
-        KakaoApproveResponseDto kakao = rt.postForObject(
-                "https://open-api.kakaopay.com/online/v1/payment/approve",
-                entity,
-                KakaoApproveResponseDto.class
-        );
+        try {
+            KakaoApproveResponseDto kakao = rt.postForObject(
+                    "https://open-api.kakaopay.com/online/v1/payment/approve",
+                    entity,
+                    KakaoApproveResponseDto.class
+            );
+        }catch (Exception e){
+            log.error("[KAKAO APPROVE] 승인 요청 실패", e);
+            throw e;
+        }
 
 
         pay.setStatus(PayStatus.SUCCESS);
+
+
 
         return reservationService.createReservation(pay);
     }
