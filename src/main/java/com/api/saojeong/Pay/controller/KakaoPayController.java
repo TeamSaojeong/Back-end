@@ -9,6 +9,7 @@ import com.api.saojeong.global.utill.response.CustomApiResponse;
 import com.api.saojeong.Pay.dto.KakaoReadyResponseDto;
 import com.api.saojeong.Pay.dto.OrderRequestDto;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/pay")
@@ -40,9 +42,12 @@ public class KakaoPayController {
                 );
     }
 
-    @GetMapping("/approve")
+    @PostMapping("/approve")
     public ResponseEntity<Void> approve(@RequestParam("pg_token") String pgToken,
                                                         @RequestParam("orderNum") String orderNum) {
+
+        log.info("[카카오 결제 승인] orderNum={}, pg_token={}",orderNum, pgToken);
+
         CreateReservationResponseDto res = kakaoPayService.payApprove(orderNum, pgToken);
 
         //성공시 리다이렉트
