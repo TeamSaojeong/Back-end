@@ -142,7 +142,7 @@ public class SoonOutServiceImpl implements SoonOutService {
                         .member(member)
                         .type("SOONOUT")
                         .soonoutId(so.getId())
-                        .title("🚗 곧 비어요 (" + minute + "분)")
+                        .title("곧 비어요 (" + minute + "분)")
                         .body((placeName != null ? placeName : "주차장"))
                         .createdAt(now)
                         .build());
