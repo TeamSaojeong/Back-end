@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
 public interface SoonOutService {
     Long createSoonOut(Double lat, Double lng, int minute, boolean status,
                        Parking parking, String provider, String externalId, Reservation reservation,
-                       String placeNameOptional,String address);
+                       String placeNameOptional,String address,Member member);
 
     DetailSoonOutEventDto getSoonOutDetail(Member member, Long soonOutId);
 
