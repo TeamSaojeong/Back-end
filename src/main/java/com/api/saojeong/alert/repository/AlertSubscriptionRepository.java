@@ -5,19 +5,22 @@ import com.api.saojeong.domain.AlertSubscription;
 import com.api.saojeong.domain.Member;
 import com.api.saojeong.domain.Parking;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-
+@Repository
 public interface AlertSubscriptionRepository extends JpaRepository<AlertSubscription, Long> {
     List<AlertSubscription> findByParkingAndActiveIsTrue(Parking parking);
     List<AlertSubscription> findByProviderAndExternalIdAndActiveIsTrue(String provider, String externalId);
-    List<AlertSubscription> findByMemberAndActiveIsTrue(Member member);
+    //List<AlertSubscription> findByMemberAndActiveIsTrue(Member member);
     // ✅ 'IsFalse' 는 상수 조건이므로 파라미터를 받지 않습니다.
-    long deleteByActiveIsFalseOrExpiresAtBefore(OffsetDateTime cutoff);
+    //long deleteByActiveIsFalseOrExpiresAtBefore(OffsetDateTime cutoff);
     boolean existsByMember_IdAndProviderAndExternalIdAndActiveIsTrue(Long memberId, String provider, String externalId);
-    boolean existsByMember_IdAndParking_IdAndActiveIsTrue(Long memberId, Long parkingId);
+    //boolean existsByMember_IdAndParking_IdAndActiveIsTrue(Long memberId, Long parkingId);
 
     Optional<AlertSubscription> findByIdAndActive(Long alertId, boolean b);
+
+    List<AlertSubscription> findByMemberIdAndActive(Long member_id, boolean active);
 }
