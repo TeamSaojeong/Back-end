@@ -125,36 +125,94 @@ public class SoonOutServiceImpl implements SoonOutService {
 
             // (중략) self / 만료 / min / 위치 TTL / 거리 / dup 등 현재 로직 그대로
 
+            //본인 제외
+            if (so.getReservation() != null && so.getReservation().getMember() != null
+                    && Objects.equals(memId, so.getReservation().getMember().getId())) {
+                skippedSelf++; continue;
+            }
+
+            //구독 만료시간
+            if (s.getExpiresAt() != null && s.getExpiresAt().isBefore(now)) {
+                skippedExpired++;
+
+                continue;
+            }
+            if (s.getMinMinutes() != null && minute < s.getMinMinutes()) {
+                skippedMin++;
+
+                continue;
+            }
+
+            var loc = locs.get(memId);
+            if (loc == null) {
+                skippedNoLoc++;
+                continue;
+            }
+
+            try {
+                var age = Duration.between(loc.getUpdatedAt(), now).abs();
+                if (age.compareTo(LOCATION_TTL) > 0) {
+                    skippedOldLoc++;
+                    continue;
+                }
+            } catch (Exception e) {
+                log.warn("[SOONOUT_AlERT] TTL check failed for memberId={}, err={}", memId, e.toString());
+                // 계산 실패 시 그냥 통과시키고 아래 거리 체크 진행
+            }
+
+            double dist = haversineMeters(lat, lng, loc.getLat(), loc.getLng());
+            boolean shouldSend = false;
+            if (dist <= KM_1) {
+                //거리가  1km 이내일시
+                shouldSend = (minute == 10 || minute == 5);
+            } else if (dist <= KM_2) {
+                //거리가 2km 이내일시
+                shouldSend = (minute == 10);
+            }
+
+            log.debug("[SOONOUT_AlERT] memId={}, dist={}m, minute={}, shouldSend={}",
+                    memId, Math.round(dist), minute, shouldSend);
+
+            //거리애 구독자가 없다면
+            if (!shouldSend) {
+                skippedDistance++;
+                continue;
+            }
+
             boolean dup = eventRepo.existsByTypeAndSoonOutIdAndMemberId(NotificationType.SOONOUT, so.getId(), memId);
             if (dup) { skippedDup++; continue; }
 
-            // 이메일 주소 꺼내기 (현재 로직 유지)
-            String email = s.getMember().getMemberId();
+            //이메일 가져오기
+            String email = s.getMember().getMemberId(); // 현 로직 유지(이 값이 이메일이 아닐 가능성 높음)
 
-            // 장소명 결정
+            //이메일이 없을시
+            if (email == null || email.isBlank()) {
+                skippedNoEmail++;
+
+                continue;
+            }
+
+            //장소이름설정 개인 / 민영,공영
             String placeName = (parking != null && parking.getName() != null)
                     ? parking.getName()
                     : placeNameOptional;
 
-            // 👉👉👉 ▶ INSERT HERE — 프론트용 개인 알림 적재
-            try {
-                userAlertRepository.save(UserAlert.builder()
-                        .member(member)
-                        .type("SOONOUT")
-                        .soonoutId(so.getId())
-                        .title("곧 비어요 (" + minute + "분)")
-                        .body((placeName != null ? placeName : "주차장"))
-                        .createdAt(now)
-                        .build());
-                userAlertRepository.flush();
-            } catch (Exception ex) {
-                log.warn("[SOONOUT_ALERT_FEED] persist failed memId={}, soId={}, err={}", memId, so.getId(), ex.toString());
-                // 저장 실패여도 이메일은 계속 진행
-            }
-            // 👈👈👈 ▶ END INSERT
-
-            // (선택) 이메일은 폴백/보조 채널: 정책대로 보낼지 여부 결정
-            if (email == null || email.isBlank()) { skippedNoEmail++; continue; }
+//            // 👉👉👉 ▶ INSERT HERE — 프론트용 개인 알림 적재
+//            try {
+//                userAlertRepository.save(UserAlert.builder()
+//                        .member(member)
+//                        .type("SOONOUT")
+//                        .soonoutId(so.getId())
+//                        .title("곧 비어요 (" + minute + "분)")
+//                        .body((placeName != null ? placeName : "주차장"))
+//                        .createdAt(now)
+//                        .build());
+//                userAlertRepository.flush();
+//            } catch (Exception ex) {
+//                log.warn("[SOONOUT_ALERT_FEED] persist failed memId={}, soId={}, err={}", memId, so.getId(), ex.toString());
+//                // 저장 실패여도 이메일은 계속 진행
+//            }
+//            // 👈👈👈 ▶ END INSERT
 
             try {
                 notifier.sendSoonOutEmail(email, placeName, minute, address);
@@ -172,6 +230,11 @@ public class SoonOutServiceImpl implements SoonOutService {
                         so.getId(), memId, email, e.getMessage(), e);
             }
         }
+
+        log.info("[SOONOUT_AlERT] soId={} sent={} skipped: expired={} min={} nolocation={} oldloc={} distance={} dup={} self={} noemail={}",
+                so.getId(), sentCnt, skippedExpired, skippedMin, skippedNoLoc, skippedOldLoc,
+                skippedDistance, skippedDup, skippedSelf, skippedNoEmail);
+
         return so.getId();
     }
 
