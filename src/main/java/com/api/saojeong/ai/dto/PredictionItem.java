@@ -1,13 +1,11 @@
 package com.api.saojeong.ai.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record PredictionItem(
-        String prkCd,
-        String prkNm,
-        String areaCd,
+        String name,
+        double lat,
+        double lon,
         double dist_km,
-        String pred_level,
-        double score,
-        double p_여유,
-        double p_보통,
-        double p_혼잡
+        String pred_level
 ) {}
