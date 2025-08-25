@@ -1,7 +1,46 @@
-# API 명세서
-### https://amazing-scraper-623.notion.site/24b48a612b6780e2b58edb2dd7a93408?v=24b48a612b6780d5bb97000cfee54a7c&source=copy_link
+# ✨Parking Here Convention 🚙 ☁
+
+<br>
+
+## 🛠️ 기술 스택(Tech Stack)
+| 기술        | 설명|
+|------------| --- |
+| Java       | v17 |
+| 프레임워크    | Spring Boot 3.5.4|
+| DB    |  MySql
+| 이미지  | S3 |
+
+<br>
+
+## 🕊️ Git Flow
+
+### 🌴 Main Flow
+|브랜치      | 역할 |
+|-----------|-----|
+|main    | 최종 배포용 브랜치 |
+| develop | 다음 배포를 위한 기능 통합 브랜치 | 
+
+<br>
+
+### 🌿 Feature Branch
+---
+#### 브랜치 단위
+- 브랜치 단위 = 이슈 단위 = PR단위
+
+####  브랜치명
+- 브랜치는 뷰 단위로 생성합니다.
+- 브랜치 규칙 → feature/#이슈번호-기능간략설명
+- `ex) feature/#1-login`
+
+<br>
+
+## 📌 API 명세서
+### [📄 Notion API 명세서](https://amazing-scraper-623.notion.site/24b48a612b6780e2b58edb2dd7a93408?v=24b48a612b6780d5bb97000cfee54a7c&source=copy_link)
+<br>
+
 --------------------------------------------------------
-### ✅ Commit Convention
+
+## 🌟 Commit Convention
 
 | 태그 이름      | 설명 |
 |------------| --- |
@@ -23,8 +62,9 @@
 - 커밋 규칙 -> FEAT. 해당 기능 설명
 - `ex) FEAT. 로그인 기능 추가`
 
+<br>
 
-### 🔸Git Working Process
+## 🔸 Git Working Process
 1. issue를 등록한다.
 2. 깃 컨벤션에 맞게 Branch를 생성한다.
 3. Add - Commit - Push - Pull Request 의 과정을 거친다.
@@ -35,13 +75,3 @@
 7. Approve를 받았다면, Merge를 진행한다.
 8. merge된 Branch는 삭제한다.
 9. 종료된 Issue와 Pull Request의 Label과 Project를 관리한다.
-
-🌴 브랜치
----
-#### 📌 브랜치 단위
-- 브랜치 단위 = 이슈 단위 = PR단위
-
-#### 📌 브랜치명
-- 브랜치는 뷰 단위로 생성합니다.
-- 브랜치 규칙 → feature/#이슈번호-기능간략설명
-- `ex) feature/#1-login`
