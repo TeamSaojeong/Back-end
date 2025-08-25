@@ -10,6 +10,7 @@ class KakaoClientConfig {
 
     @Bean
     WebClient kakaoWebClient(@Value("${kakao.rest-api-key}") String apiKey) {
+
         return WebClient.builder()
                 .baseUrl("https://dapi.kakao.com")
                 .defaultHeader("Authorization", "KakaoAK " + apiKey)
