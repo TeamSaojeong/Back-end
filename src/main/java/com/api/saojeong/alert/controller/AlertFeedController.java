@@ -20,22 +20,22 @@ import java.util.List;
 public class AlertFeedController {
     private final UserAlertRepository repo;
 
-//    @GetMapping("/feed")
-//    public List<AlertItemDto> feed(@LoginMember Member me) {
-//        return repo.findById(me.getId()).stream()
-//                .map(ua -> new AlertItemDto(
-//                        ua.getId(), ua.getType(), ua.getSoonoutId(),
-//                        ua.getTitle(), ua.getBody(), ua.getDeeplink(),
-//                        ua.getCreatedAt()))
-//                .toList();
-//    }
-//
-//    @PostMapping("/consume")
-//    public void consume(@AuthenticationPrincipal Member me, @RequestBody Ids req) {
-//        repo.consumeAlerts(me.getId(), req.ids(), OffsetDateTime.now());
-//    }
-//
-//    public record AlertItemDto(Long id, String type, Long soId, String title, String body,
-//                               String deeplink, OffsetDateTime createdAt) {}
-//    public record Ids(List<Long> ids) {}
+    @GetMapping("/feed")
+    public List<AlertItemDto> feed(@LoginMember Member me) {
+        return repo.findById(me.getId()).stream()
+                .map(ua -> new AlertItemDto(
+                        ua.getId(), ua.getType(), ua.getSoonoutId(),
+                        ua.getTitle(), ua.getBody(), ua.getDeeplink(),
+                        ua.getCreatedAt()))
+                .toList();
+    }
+
+    @PostMapping("/consume")
+    public void consume(@AuthenticationPrincipal Member me, @RequestBody Ids req) {
+        repo.consumeAlerts(me.getId(), req.ids(), OffsetDateTime.now());
+    }
+
+    public record AlertItemDto(Long id, String type, Long soId, String title, String body,
+                               String deeplink, OffsetDateTime createdAt) {}
+    public record Ids(List<Long> ids) {}
 }
