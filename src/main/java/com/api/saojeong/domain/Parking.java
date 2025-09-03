@@ -1,13 +1,9 @@
 package com.api.saojeong.domain;
 
-import com.api.saojeong.Parking.enums.ParkingKind;
 import com.api.saojeong.global.utill.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.domain.Auditable;
 
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,10 +34,6 @@ public class Parking extends BaseEntity{
 
     @Column(name = "p_lng", nullable = false)
     private Double pLng;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name="kind")
-    private ParkingKind kind;
 
     @Column(name="charge", nullable = false)
     private int charge;

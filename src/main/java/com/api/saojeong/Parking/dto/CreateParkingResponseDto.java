@@ -10,7 +10,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class CreateParkingResponseDto {
-    //Long member_id;
     private Long parkingId;
     private String parkingName;
     private List<ParkingTimeDto> operateTimes;
