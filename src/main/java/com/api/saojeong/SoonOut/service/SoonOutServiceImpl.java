@@ -261,7 +261,7 @@ public class SoonOutServiceImpl implements SoonOutService {
     @Override
     public DetailSoonOutEventDto getSoonOutDetail(Member member, Long soonOutId) {
         //곧나감 확인
-        SoonOut soonOut = soonRepo.findByIdAndStatus(soonOutId, true)
+        SoonOut soonOut = soonRepo.findById(soonOutId)
                 .orElseThrow(SoonOutNotFoundException::new);
 
         //알림이벤트 확인

@@ -50,10 +50,11 @@ public class ReservationServiceImpl implements ReservationService {
         List<Reservation> reservations = reservationRepository.findByParkingIdAndStatus(parkingId, true);
 
         if(!reservations.isEmpty()){
-            //선예약
+            //선예약가능 체크
             if(reservations.size() == 1){
-                //지금 예약이 1개와 곧나감 활성화된게 있고
-                Optional<SoonOut> soonOutOpt = soonOutRepository.findByParkingIdAndStatus(parkingId, true );
+                //지금 예약이 1개일때
+                //곧나감이 존재확인
+                Optional<SoonOut> soonOutOpt = soonOutRepository.findByParkingId(parkingId);
 
                 //존재하지 않으면 -> Using
                 if(soonOutOpt.isPresent()){
@@ -112,8 +113,8 @@ public class ReservationServiceImpl implements ReservationService {
         //선 예약 : 곧 나감을 눌렀고
         if (reservation.isPresent()) {
 
-            //곧 나감 활성화&존재 확인
-            SoonOut soonOut = soonOutRepository.findByParkingIdAndStatus(parking.getId(), true )
+            //곧 나감 존재 확인
+            SoonOut soonOut = soonOutRepository.findByParkingId(parking.getId())
                     .orElseThrow(SoonOutNotFoundException::new);
 
             //10~6분 남았을때 : 예약하는 시간 +10분 뒤부터 시작
