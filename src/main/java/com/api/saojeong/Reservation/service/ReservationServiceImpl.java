@@ -11,6 +11,7 @@ import com.api.saojeong.SoonOut.exception.SoonOutNotFoundException;
 import com.api.saojeong.SoonOut.respotiory.SoonOutRepository;
 import com.api.saojeong.domain.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +20,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservationServiceImpl implements ReservationService {
@@ -261,13 +262,16 @@ public class ReservationServiceImpl implements ReservationService {
     //운영시간 체크 & 마지막 에약 시작 가능 시각을 넘겼을때 (10분단위)
     public OperateTimeCheck checkOperateTime(Long parkingId) {
         LocalTime now = LocalTime.now();
+        log.info("LocalTime 시간 = {}", now);
 
         //운영시간
         List<ParkingTime> operateTimes = parkingTimeRepository.findByParkingId(parkingId);
 
         for (ParkingTime parkingTime : operateTimes) {
             LocalTime start = parkingTime.getStart();
+            log.info("start = {}", start);
             LocalTime end = parkingTime.getEnd();
+            log.info("end = {}", end);
 
             //현재 시간이 포함된 운영시간 찾기
             if (now.isAfter(start) && now.isBefore(end)) {
