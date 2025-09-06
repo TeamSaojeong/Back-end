@@ -21,9 +21,6 @@ public class CreateSoonOutRequestDto {
     @Max(value = 10, message = "minute은 5 또는 10이어야 합니다.")
     private int minute;                // 필수 (5 or 10)
 
-    // defaultValue = true
-    private boolean status = true;
-
     private Long reservationId;
     private String placeName;
     private String address;
