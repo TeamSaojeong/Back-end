@@ -32,8 +32,7 @@ public class SoonOut extends BaseEntity {
     private int minute;
 
     // 내부 주차장 연계(개인 대여)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parking_id")
+    @OneToOne(fetch = FetchType.LAZY)
     private Parking parking;
 
     // 외부 주차장 식별(카카오 등) — parking 이 null일 때 사용
@@ -47,4 +46,5 @@ public class SoonOut extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
+
 }
