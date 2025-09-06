@@ -17,38 +17,35 @@ public class Pay extends BaseEntity {
     @Column(name="order_id")
     private Long id;
 
-    @Column(name="order_num")
+    @Column(name="order_num", nullable = false)
     private String orderNum;
 
-    @Column(name="parkingName")
-    private String parkingName;
-
-    @Column(name="total")
+    @Column(name="total", nullable = false)
     private int total;
 
     @Column(name="quantity")
     private int quantity;
 
-    @Column(name="tid")
+    @Column(name="tid", nullable = false)
     private String tid;
 
-    @Column(name="using_minutes")
+    @Column(name="using_minutes", nullable = false)
     private int usingMinutes;
 
     @Enumerated(EnumType.STRING)
-    @Column(name="pay_status")
+    @Column(name="pay_status", nullable = false)
     private PayStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="member_id")
+    @JoinColumn(name="member_id", nullable = false)
     private Member member;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="reservation_id")
+    @JoinColumn(name="reservation_id", nullable = false)
     private Reservation reservation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parking_id")
+    @JoinColumn(name = "parking_id", nullable = false)
     private Parking parking;
 
 }

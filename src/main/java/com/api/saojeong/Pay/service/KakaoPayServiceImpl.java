@@ -105,7 +105,6 @@ public class KakaoPayServiceImpl implements KakaoPayService {
             Pay pay = Pay.builder()
                     .orderNum(orderNum)
                     .member(member)
-                    .parkingName(req.getParkName())
                     .quantity(1)
                     .total(req.getTotal())
                     .tid(res.getTid())
