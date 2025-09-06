@@ -219,11 +219,12 @@ public class ReservationServiceImpl implements ReservationService {
                 res.getUserEnd()
                 .plusMinutes(req.getUsingMinutes()));
 
-        //곧나감이 존재하면 비활성화
-        SoonOut soonOut = soonOutRepository.findByReservationIdAndStatus(reservationId, true);
-        if(soonOut != null){
-            soonOut.setStatus(false);
-        }
+        //곧나감 취소 기능이 사라지면서 체크를 하지 않아도 괜찮기에 주석화
+//        //곧나감이 존재하면 비활성화
+//        SoonOut soonOut = soonOutRepository.findByReservationIdAndStatus(reservationId, true);
+//        if(soonOut != null){
+//            soonOut.setStatus(false);
+//        }
 
 
         return new CreateReservationResponseDto(
