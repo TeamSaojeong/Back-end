@@ -78,6 +78,7 @@ public class HousekeeperScheduler {
     }
     @Transactional
     protected void cleanupSoonOutExpired(LocalDateTime now) {
+        //삭제 쿼리
         int deleted = soonOutRepository.deleteExpiredNow(now);
         if (deleted > 0) {
                 log.info("[HK][cleanupSoonOutExpired] deleted count={}", deleted);
