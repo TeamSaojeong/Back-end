@@ -7,11 +7,9 @@ import com.api.saojeong.alert.Enum.NotificationType;
 import com.api.saojeong.alert.exception.EventNotFoundException;
 import com.api.saojeong.alert.repository.AlertSubscriptionRepository;
 import com.api.saojeong.alert.repository.NotificationEventRepository;
-import com.api.saojeong.alert.repository.UserAlertRepository;
 import com.api.saojeong.alert.service.NotificationService;
 import com.api.saojeong.domain.*;
 import com.api.saojeong.memberLocation.repository.MemberLocationRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +20,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -40,9 +37,9 @@ public class SoonOutServiceImpl implements SoonOutService {
     private final MemberLocationRepository locationRepo;
     private final NotificationService notifier;
     private final AlertSubscriptionRepository subRepo;
-    private final UserAlertRepository userAlertRepository; // 👈 추가 (앞서 만든 Repo)
-    private final ObjectMapper objectMapper;
-
+//    private final UserAlertRepository userAlertRepository; // 👈 추가 (앞서 만든 Repo)
+//    private final ObjectMapper objectMapper;
+//
 //    private final ReservationRepository reservationRepository;
 //    private final SoonOutRepository soonOutRepository;
 
