@@ -118,7 +118,7 @@ public class HousekeeperScheduler {
                 eventRepository.save(
                         NotificationEvent.builder()
                                 .type(NotificationType.RESERVATION_10M)           // ★ NotificationEvent에 type 필드 있는 버전 전제
-                                .reservationId(resId)
+                                .reservation(r)
                                 .member(r.getMember())
                                 .sent(true)
                                 .build()

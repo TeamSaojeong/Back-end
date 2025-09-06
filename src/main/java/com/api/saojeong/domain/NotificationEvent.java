@@ -33,12 +33,13 @@ public class NotificationEvent extends BaseEntity {
     private NotificationType type;
 
     /** SoonOut 기반 알림이면 채움, 아니라면 null */
-    @Column(name = "soonout_id", nullable = true)
-    private Long soonOutId;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    private SoonOut soonOut;
 
     /** 예약 기반 알림이면 채움, 아니라면 null */
-    @Column(name = "reservation_id")
-    private Long reservationId;
+    @OneToOne(fetch = FetchType.LAZY)
+    private Reservation reservation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)

@@ -228,7 +228,7 @@ public class SoonOutServiceImpl implements SoonOutService {
 
                 eventRepo.save(NotificationEvent.builder()
                         .type(NotificationType.SOONOUT)
-                        .soonOutId(so.getId())
+                        .soonOut(so)
                         .member(s.getMember())
                         .sent(true)
                         .build());
