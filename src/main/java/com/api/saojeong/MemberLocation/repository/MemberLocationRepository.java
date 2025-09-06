@@ -1,4 +1,4 @@
-package com.api.saojeong.memberLocation.repository;
+package com.api.saojeong.MemberLocation.repository;
 
 import com.api.saojeong.domain.MemberLocation;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -12,7 +12,7 @@ import com.api.saojeong.alert.repository.AlertSubscriptionRepository;
 import com.api.saojeong.alert.repository.NotificationEventRepository;
 import com.api.saojeong.alert.service.NotificationService;
 import com.api.saojeong.domain.*;
-import com.api.saojeong.memberLocation.repository.MemberLocationRepository;
+import com.api.saojeong.MemberLocation.repository.MemberLocationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
