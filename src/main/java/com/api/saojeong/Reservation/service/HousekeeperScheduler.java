@@ -78,6 +78,7 @@ public class HousekeeperScheduler {
     }
     @Transactional
     protected void cleanupSoonOutExpired(LocalDateTime now) {
+        //삭제 쿼리
         int deleted = soonOutRepository.deleteExpiredNow(now);
         if (deleted > 0) {
                 log.info("[HK][cleanupSoonOutExpired] deleted count={}", deleted);
@@ -117,7 +118,7 @@ public class HousekeeperScheduler {
                 eventRepository.save(
                         NotificationEvent.builder()
                                 .type(NotificationType.RESERVATION_10M)           // ★ NotificationEvent에 type 필드 있는 버전 전제
-                                .reservationId(resId)
+                                .reservation(r)
                                 .member(r.getMember())
                                 .sent(true)
                                 .build()

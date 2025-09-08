@@ -157,8 +157,8 @@ public class ParkingSearchService {
                             .map(p -> new ParkingWithRate(
                                     p.id, p.placeName, p.addressName,
                                     p.x, p.y, p.placeUrl,
-                                    p.rateInfo == null ? null : p.rateInfo.getTimerate(),
-                                    p.rateInfo == null ? null : p.rateInfo.getAddrate(),
+                                    p.rateInfo == null ? null : p.rateInfo.getTimeRate(),
+                                    p.rateInfo == null ? null : p.rateInfo.getAddRate(),
                                     p.distance
                             ))
                             .collect(Collectors.toList());

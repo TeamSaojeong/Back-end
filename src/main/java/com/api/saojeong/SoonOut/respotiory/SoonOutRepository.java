@@ -9,14 +9,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface SoonOutRepository extends JpaRepository<SoonOut,Long> {
-    SoonOut findByReservationIdAndStatus(Long reservationId, boolean b);
+    SoonOut findByReservationId(Long reservationId);
 
-    Optional<SoonOut> findByParkingIdAndStatus(Long parkingId, boolean b);
+    Optional<SoonOut> findByParkingId(Long parkingId);
 
     boolean existsByProviderAndExternalId(String provider, String externalId);
     // created_at + minute(분) <= now 인 것들 (상태 true만)
@@ -25,10 +24,9 @@ public interface SoonOutRepository extends JpaRepository<SoonOut,Long> {
     @Transactional
     @Query(value = """
         DELETE FROM soon_out
-        WHERE status = 1
-          AND TIMESTAMPADD(MINUTE, minute, created_at) <= :now
+        WHERE TIMESTAMPADD(MINUTE, minute, created_at) <= :now
         """, nativeQuery = true)
     int deleteExpiredNow(@Param("now") LocalDateTime now);
 
-    Optional<SoonOut> findByIdAndStatus(Long soonOutId, boolean b);
+    Optional<SoonOut> findById(Long id);
 }

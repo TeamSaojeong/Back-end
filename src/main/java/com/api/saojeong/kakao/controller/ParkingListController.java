@@ -94,8 +94,8 @@ public class ParkingListController {
                 .map(list -> {
                     double sum = 0; int n = 0;
                     for (ParkingWithRate p : list) {
-                        Integer tr = p.timerate(); // 분
-                        Integer ar = p.addrate();  // 원
+                        Integer tr = p.timeRate(); // 분
+                        Integer ar = p.addRate();  // 원
                         if (tr != null && tr > 0 && ar != null) {
                             // per 10 minutes fee = addrate * (10.0 / timerate)
                             double per10 = ar * (10.0 / tr);

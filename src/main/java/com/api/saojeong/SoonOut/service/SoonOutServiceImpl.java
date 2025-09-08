@@ -1,5 +1,8 @@
 package com.api.saojeong.SoonOut.service;
 
+import com.api.saojeong.Parking.repository.ParkingRepository;
+import com.api.saojeong.Reservation.repository.ReservationRepository;
+import com.api.saojeong.SoonOut.dto.CreateSoonOutRequestDto;
 import com.api.saojeong.SoonOut.dto.DetailSoonOutEventDto;
 import com.api.saojeong.SoonOut.exception.SoonOutNotFoundException;
 import com.api.saojeong.SoonOut.respotiory.SoonOutRepository;
@@ -7,11 +10,9 @@ import com.api.saojeong.alert.Enum.NotificationType;
 import com.api.saojeong.alert.exception.EventNotFoundException;
 import com.api.saojeong.alert.repository.AlertSubscriptionRepository;
 import com.api.saojeong.alert.repository.NotificationEventRepository;
-import com.api.saojeong.alert.repository.UserAlertRepository;
 import com.api.saojeong.alert.service.NotificationService;
 import com.api.saojeong.domain.*;
-import com.api.saojeong.memberLocation.repository.MemberLocationRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.api.saojeong.MemberLocation.repository.MemberLocationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -40,25 +40,37 @@ public class SoonOutServiceImpl implements SoonOutService {
     private final MemberLocationRepository locationRepo;
     private final NotificationService notifier;
     private final AlertSubscriptionRepository subRepo;
-    private final UserAlertRepository userAlertRepository; // 👈 추가 (앞서 만든 Repo)
-    private final ObjectMapper objectMapper;
-
+    private final ParkingRepository parkingRepo;
+    private final ReservationRepository reservationRepo;
+//    private final UserAlertRepository userAlertRepository; // 👈 추가 (앞서 만든 Repo)
+//    private final ObjectMapper objectMapper;
+//
 //    private final ReservationRepository reservationRepository;
 //    private final SoonOutRepository soonOutRepository;
 
     //곧나감추가 & 알림 발송
     @Transactional
-    public Long createSoonOut(Double lat, Double lng, int minute, boolean status,
-                              Parking parking, String provider, String externalId, Reservation reservation,
-                              String placeNameOptional,String address,Member member) {
+    public Long createSoonOut(Member member, CreateSoonOutRequestDto req) {
 
-        log.info("[SOONOUT][REQ] lat={}, lng={}, minute={}, status={}, parkingId={}, provider={}, externalId={}, reservationId={}, placeName={}",
-                lat, lng, minute, status,
+        Parking parking = (req.getParkingId() != null) ? parkingRepo.findById(req.getParkingId()).orElse(null) : null;
+        Reservation reservation = (req.getReservationId()!= null) ? reservationRepo.findById(req.getReservationId()).orElse(null) : null;
+
+        double lat = req.getLat();
+        double lng = req.getLng();
+        int minute =  req.getMinute();
+        String provider = req.getProvider();
+        String externalId = req.getExternalId();
+        String placeName = req.getPlaceName();
+        String address = req.getAddress();
+
+
+
+        log.info("[SOONOUT][REQ] lat={}, lng={}, minute={}, parkingId={}, provider={}, externalId={}, reservationId={}, placeName={}",
+                lat, lng, minute,
                 parking != null ? parking.getId() : null,
                 provider, externalId,
                 reservation != null ? reservation.getId() : null,
-                placeNameOptional);
-
+                placeName);
 
         SoonOut so ;
         //개인이면
@@ -67,11 +79,9 @@ public class SoonOutServiceImpl implements SoonOutService {
                     .lat(lat)
                     .lng(lng)
                     .minute(minute)
-                    .status(status)
                     .parking(parking)
                     .reservation(reservation)
-                    .placeName(placeNameOptional)
-                    .address(address)
+                    .placeName(placeName)
                     .build();
         }
         else { //공영,민영
@@ -79,11 +89,10 @@ public class SoonOutServiceImpl implements SoonOutService {
             so = SoonOut.builder()
                     .lat(lat).lng(lng)
                     .minute(minute)
-                    .status(status)
                     .provider(provider)
                     .externalId(externalId)
                     .reservation(reservation)
-                    .placeName(placeNameOptional)
+                    .placeName(placeName)
                     .build();
         }
         so = soonRepo.save(so);
@@ -193,9 +202,9 @@ public class SoonOutServiceImpl implements SoonOutService {
             }
 
             //장소이름설정 개인 / 민영,공영
-            String placeName = (parking != null && parking.getName() != null)
+            String sendPlaceName = (parking != null && parking.getName() != null)
                     ? parking.getName()
-                    : placeNameOptional;
+                    : placeName;
 
 //            // 👉👉👉 ▶ INSERT HERE — 프론트용 개인 알림 적재
 //            try {
@@ -215,11 +224,11 @@ public class SoonOutServiceImpl implements SoonOutService {
 //            // 👈👈👈 ▶ END INSERT
 
             try {
-                notifier.sendSoonOutEmail(email, placeName, minute, address);
+                notifier.sendSoonOutEmail(email, sendPlaceName, minute, address);
 
                 eventRepo.save(NotificationEvent.builder()
                         .type(NotificationType.SOONOUT)
-                        .soonOutId(so.getId())
+                        .soonOut(so)
                         .member(s.getMember())
                         .sent(true)
                         .build());
@@ -252,7 +261,7 @@ public class SoonOutServiceImpl implements SoonOutService {
     @Override
     public DetailSoonOutEventDto getSoonOutDetail(Member member, Long soonOutId) {
         //곧나감 확인
-        SoonOut soonOut = soonRepo.findByIdAndStatus(soonOutId, true)
+        SoonOut soonOut = soonRepo.findById(soonOutId)
                 .orElseThrow(SoonOutNotFoundException::new);
 
         //알림이벤트 확인

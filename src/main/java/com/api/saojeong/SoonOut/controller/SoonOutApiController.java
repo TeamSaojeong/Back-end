@@ -24,17 +24,11 @@ import org.springframework.web.bind.annotation.*;
 public class SoonOutApiController {
 
     private final SoonOutService soonOutService;
-    private final ParkingRepository parkingRepo;
-    private final ReservationRepository reservationRepo;
 
     @PostMapping
     public ResponseEntity<?> createSoonOut(@LoginMember Member member, CreateSoonOutRequestDto req) {
-        Parking parking = (req.getParkingId() != null) ? parkingRepo.findById(req.getParkingId()).orElse(null) : null;
-        Reservation res = (req.getReservationId()!= null) ? reservationRepo.findById(req.getReservationId()).orElse(null) : null;
 
-        Long id = soonOutService.createSoonOut(req.getLat(), req.getLng(), req.getMinute(), req.isStatus(),
-                parking, req.getProvider(), req.getExternalId(),
-                res, req.getPlaceName(), req.getAddress(),member);
+        Long id = soonOutService.createSoonOut(member, req);
         return ResponseEntity.ok(CustomApiResponse.createSuccess(HttpStatus.OK.value(),
                 java.util.Map.of("soonOut_id", id), "곧나감 등록 및 거리 규칙 기반 알림 발송 처리"));
     }

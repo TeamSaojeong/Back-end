@@ -17,9 +17,6 @@ public class CreateParkingRequestDto {
     @NotBlank(message = "주차 주소를 입력해주세요.")
     private String address;
 
-    //@NotBlank(message = "주차 공간 사진을 추가해주세요.")
-    //private String photo;
-
     @NotBlank(message = "내용은 필수입니다.")
     private String content;
 

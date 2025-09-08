@@ -2,12 +2,10 @@ package com.api.saojeong.alert.repository;
 
 
 import com.api.saojeong.domain.AlertSubscription;
-import com.api.saojeong.domain.Member;
 import com.api.saojeong.domain.Parking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 @Repository

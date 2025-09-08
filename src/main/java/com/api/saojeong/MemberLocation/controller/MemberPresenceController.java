@@ -1,14 +1,13 @@
-package com.api.saojeong.memberLocation.controller;
+package com.api.saojeong.MemberLocation.controller;
 
 
 
 import com.api.saojeong.Member.repository.MemberRepository;
 import com.api.saojeong.domain.Member;
 import com.api.saojeong.domain.MemberLocation;
-import com.api.saojeong.domain.MemberRole;
 import com.api.saojeong.global.security.LoginMember;
 import com.api.saojeong.global.utill.response.CustomApiResponse;
-import com.api.saojeong.memberLocation.repository.MemberLocationRepository;
+import com.api.saojeong.MemberLocation.repository.MemberLocationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

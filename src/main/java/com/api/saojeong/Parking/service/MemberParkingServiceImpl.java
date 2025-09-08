@@ -2,7 +2,6 @@ package com.api.saojeong.Parking.service;
 
 import com.api.saojeong.Member.repository.MemberRepository;
 import com.api.saojeong.Parking.dto.*;
-import com.api.saojeong.Parking.enums.ParkingKind;
 import com.api.saojeong.Parking.exception.FailGeoCodingException;
 import com.api.saojeong.Parking.exception.ParkingNotFoundException;
 import com.api.saojeong.Parking.exception.S3UploadFailedException;
@@ -34,9 +33,6 @@ public class MemberParkingServiceImpl implements MemberParkingService {
     //개인 주차장 추가
     @Override
     public CreateParkingResponseDto save(Member member, MultipartFile image, CreateParkingRequestDto req) {
-        //멤버 확인
-//        Member member = memberRepository.findById(memberId)
-//                .orElseThrow(); //예외 추가하기
 
         //좌표 변환
         GeoResponse geo = parkingGeocodingService.getGeoCoing(req.getZipcode(), req.getAddress());
@@ -59,7 +55,6 @@ public class MemberParkingServiceImpl implements MemberParkingService {
                 .address(req.getAddress())
                 .pLat(lat)
                 .pLng(lng)
-                .kind(ParkingKind.PERSONAL)
                 .charge(req.getCharge())
                 .image(url)
                 .operate(true)
@@ -92,7 +87,7 @@ public class MemberParkingServiceImpl implements MemberParkingService {
     //개인 주차장 리스트 조회
     @Override
     public List<GetMemberParkingResponseDto> getMemberParking(Member member) {
-        List<Parking> memberParkings = parkingRepository.findByMemberIdAndKind(member.getId(), ParkingKind.PERSONAL);
+        List<Parking> memberParkings = parkingRepository.findByMemberId(member.getId());
 
         List<GetMemberParkingResponseDto> res = new ArrayList<>();
 

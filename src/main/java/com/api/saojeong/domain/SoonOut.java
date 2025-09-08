@@ -17,7 +17,7 @@ public class SoonOut extends BaseEntity {
     @Column(name = "soonout_id")
     private Long id;
 
-    @Column(name="placeName")
+    @Column(name="placeName", nullable = false)
     private String placeName;
 
     // 위치(외부/내부 공통)
@@ -27,20 +27,12 @@ public class SoonOut extends BaseEntity {
     @Column(name = "lng", nullable = false)
     private Double lng;
 
-    @Column(name="address")
-    private String address;
-
-    // 곧나감 남김(활성) 여부 (버튼 누름 여부)
-    @Column(name = "status", nullable = false)
-    private Boolean status;
-
     // 10/5 분 같은 남은 시간(분)
     @Column(name = "minute", nullable = false)
     private int minute;
 
     // 내부 주차장 연계(개인 대여)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parking_id")
+    @OneToOne(fetch = FetchType.LAZY)
     private Parking parking;
 
     // 외부 주차장 식별(카카오 등) — parking 이 null일 때 사용
@@ -54,4 +46,5 @@ public class SoonOut extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
+
 }
